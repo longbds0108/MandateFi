@@ -1,0 +1,1426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MandateFi · App</title>
+<meta name="description" content="MandateFi app — vault, mandates, agent console and policy trace on Ethereum Sepolia." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-bg: #0E0B14;
+    --color-surface: #16121F;
+    --color-surface-hover: #1D1829;
+    --color-border: #2A2438;
+    --color-text-primary: #F4F2F7;
+    --color-text-secondary: #A79DB5;
+    --color-accent: #e8e3d5;
+    --color-accent-hover: #d6d0bf;
+    --color-accent-ink: #0E0B14;
+    --color-accent-soft: rgba(232, 227, 213, 0.08);
+    --color-safe: #4FD1C5;
+    --color-warning: #E8B54C;
+    --color-danger: #E5484D;
+    --font-body: 'Inter Tight', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-feature-settings: 'tnum' 1, 'ss01' 1;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    min-height: 100vh;
+  }
+  a { color: inherit; text-decoration: none; cursor: pointer; }
+  button { font-family: inherit; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+  /* ───── Sidebar ───── */
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    background: #13101c;
+    border-right: 1px solid var(--color-border);
+    padding: 28px 20px;
+    display: flex; flex-direction: column; gap: 24px;
+    position: sticky; top: 0; height: 100vh;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; font-size: 1.1rem;
+    letter-spacing: -0.02em; padding: 0 8px;
+  }
+  .seal {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--color-accent);
+    display: grid; place-items: center;
+    font-size: 12px; font-weight: 600; color: var(--color-accent-ink);
+  }
+  .nav-group { display: flex; flex-direction: column; gap: 4px; }
+  .nav-group-label {
+    font-size: 0.66rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--color-text-secondary);
+    padding: 0 12px; margin-bottom: 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px; border-radius: 8px;
+    color: rgba(244, 242, 247, 0.68);
+    font-size: 0.88rem; font-weight: 500;
+    transition: background .18s, color .18s;
+    position: relative;
+  }
+  .nav-item:hover { background: rgba(255, 255, 255, 0.04); color: var(--color-text-primary); }
+  .nav-item.active {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    padding-left: 10px;
+  }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
+    width: 2px; background: var(--color-accent); border-radius: 2px;
+  }
+  .nav-item .ic {
+    width: 16px; height: 16px; flex-shrink: 0;
+    display: grid; place-items: center;
+    font-size: 0.9rem; opacity: 0.9;
+  }
+  .sidebar-foot {
+    margin-top: auto; padding: 14px 12px;
+    font-size: 0.72rem; color: var(--color-text-secondary); line-height: 1.5;
+  }
+  .sidebar-foot .flag {
+    color: var(--color-warning); font-weight: 500;
+    letter-spacing: 0.04em; margin-bottom: 6px;
+    font-size: 0.68rem; text-transform: uppercase;
+  }
+
+  /* ───── Main area ───── */
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .topbar {
+    height: 64px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex; align-items: center;
+    padding: 0 32px; gap: 16px;
+    background: rgba(14, 11, 20, 0.85);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .crumbs {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.82rem; color: var(--color-text-secondary);
+  }
+  .crumbs .sep { opacity: 0.4; }
+  .crumbs .current { color: var(--color-text-primary); font-weight: 500; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .net-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--color-accent-soft);
+    border: 1px solid rgba(232, 227, 213, 0.22);
+    font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+    font-weight: 500;
+  }
+  .net-pill .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--color-safe);
+    box-shadow: 0 0 8px var(--color-safe);
+  }
+  .addr-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border: 1px solid var(--color-border);
+    border-radius: 999px; font-size: 0.78rem;
+  }
+  .addr-pill .av {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: linear-gradient(135deg, #e8e3d5, #3f91ff);
+  }
+
+  .content { padding: 28px 32px; width: 100%; max-width: 1440px; }
+  .page-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 24px; gap: 20px;
+  }
+  .page-head h1 {
+    font-size: 1.95rem; font-weight: 600;
+    letter-spacing: -0.025em; line-height: 1.1;
+  }
+  .page-head .sub {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem; margin-top: 6px;
+  }
+  .page-head-actions { display: flex; gap: 10px; }
+
+  /* ───── View routing ───── */
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn .25s cubic-bezier(0.22, 1, 0.36, 1); }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* ───── Glass panel ───── */
+  .glass {
+    background: rgba(22, 18, 31, 0.55);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* ───── Stat card ───── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 20px;
+  }
+  .stat {
+    padding: 20px 22px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: border-color .25s ease;
+  }
+  .stat:hover { border-color: rgba(232, 227, 213, 0.3); }
+  .stat .lbl {
+    font-size: 0.7rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--color-text-secondary);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat .val {
+    font-size: 1.6rem; font-weight: 600;
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .stat .val .unit {
+    font-size: 0.78rem; color: var(--color-text-secondary);
+    margin-left: 6px; font-weight: 400;
+  }
+  .stat .delta { font-size: 0.74rem; color: var(--color-text-secondary); }
+  .stat .delta.up { color: var(--color-safe); }
+  .stat .delta.down { color: var(--color-danger); }
+
+  /* ───── Buttons ───── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 10px 18px; border: none; border-radius: 8px;
+    font-size: 0.84rem; font-weight: 600; line-height: 1;
+    transition: background .2s, color .2s, border-color .2s, transform .15s;
+  }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--color-accent); color: var(--color-accent-ink); }
+  .btn-primary:hover:not(:disabled) { background: var(--color-accent-hover); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+  }
+  .btn-ghost:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid rgba(229, 72, 77, 0.4);
+    color: var(--color-danger);
+  }
+  .btn-danger:hover { background: rgba(229, 72, 77, 0.1); border-color: var(--color-danger); }
+  .btn-sm { padding: 7px 12px; font-size: 0.78rem; }
+  .btn-wide { width: 100%; padding: 13px 20px; }
+
+  /* ───── Badge ───── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; font-size: 0.66rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border-radius: 999px; border: 1px solid;
+  }
+  .badge.active, .badge.allowed { color: var(--color-safe); background: rgba(79, 209, 197, 0.1); border-color: rgba(79, 209, 197, 0.3); }
+  .badge.paused, .badge.approval { color: var(--color-warning); background: rgba(232, 181, 76, 0.1); border-color: rgba(232, 181, 76, 0.3); }
+  .badge.revoked, .badge.denied { color: var(--color-danger); background: rgba(229, 72, 77, 0.1); border-color: rgba(229, 72, 77, 0.3); }
+  .badge.expired { color: var(--color-text-secondary); background: transparent; border-color: var(--color-border); }
+
+  /* ───── Table ───── */
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 13px 20px; font-size: 0.86rem; border-bottom: 1px solid var(--color-border); }
+  th { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-secondary); background: rgba(255, 255, 255, 0.015); }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: var(--color-surface-hover); }
+  tbody tr:last-child td { border-bottom: none; }
+  td code, td .mono { font-size: 0.82rem; color: var(--color-text-secondary); }
+  .num-cell { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ───── Form ───── */
+  .form-section {
+    padding: 24px 28px; background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: 14px;
+    margin-bottom: 16px;
+  }
+  .form-section h3 { font-size: 1.02rem; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.015em; }
+  .form-section .section-sub { font-size: 0.82rem; color: var(--color-text-secondary); margin-bottom: 20px; }
+  .field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    font-size: 0.78rem; font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .field .hint { font-size: 0.74rem; color: var(--color-text-secondary); line-height: 1.4; }
+  .field input, .field select, .field textarea {
+    padding: 11px 14px; background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: 8px; font-family: inherit; font-size: 0.9rem;
+    transition: border-color .2s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: var(--color-accent);
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .input-group { position: relative; display: flex; }
+  .input-group input { flex: 1; padding-right: 70px; }
+  .input-group .suffix {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 0.78rem; color: var(--color-text-secondary); font-weight: 500;
+  }
+
+  /* ───── Chip list ───── */
+  .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; background: var(--color-surface-hover);
+    border: 1px solid var(--color-border); border-radius: 999px;
+    font-size: 0.78rem;
+  }
+  .chip .x { color: var(--color-text-secondary); cursor: pointer; font-size: 0.9rem; }
+  .chip .x:hover { color: var(--color-danger); }
+  .chip-add {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; background: transparent;
+    border: 1px dashed var(--color-border); border-radius: 999px;
+    font-size: 0.78rem; color: var(--color-text-secondary); font-family: inherit;
+  }
+  .chip-add:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+  /* ───── Toggle ───── */
+  .toggle { display: inline-flex; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; padding: 3px; }
+  .toggle button {
+    padding: 8px 14px; background: transparent; border: none;
+    color: var(--color-text-secondary); font-family: inherit;
+    font-size: 0.82rem; font-weight: 500; border-radius: 5px;
+    transition: all .2s;
+  }
+  .toggle button.on { background: var(--color-accent); color: var(--color-accent-ink); }
+
+  /* ───── Progress bar ───── */
+  .progress {
+    position: relative; height: 8px;
+    background: var(--color-surface-hover); border-radius: 999px; overflow: hidden;
+  }
+  .progress .fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--color-accent); border-radius: 999px;
+    transition: width .5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .progress.warn .fill { background: var(--color-warning); }
+  .progress.danger .fill { background: var(--color-danger); }
+
+  /* ───── Panel heading ───── */
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--color-border);
+  }
+  .panel-head h3 { font-size: 0.9rem; font-weight: 600; letter-spacing: -0.005em; }
+  .panel-head .sub { font-size: 0.75rem; color: var(--color-text-secondary); }
+  .panel-body { padding: 18px 20px; }
+
+  /* ───── Trace list ───── */
+  .trace-item {
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 16px; padding: 14px 20px;
+    border-bottom: 1px solid var(--color-border);
+    align-items: center;
+  }
+  .trace-item:last-child { border-bottom: none; }
+  .trace-item .meta {
+    font-size: 0.7rem; color: var(--color-text-secondary);
+    margin-bottom: 4px; letter-spacing: 0.03em;
+  }
+  .trace-item .desc { font-size: 0.88rem; }
+  .trace-item .desc strong { color: var(--color-accent); font-weight: 500; }
+
+  /* ───── Mandate row ───── */
+  .mrow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 110px 160px 100px;
+    gap: 16px; padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    align-items: center;
+    cursor: pointer; transition: background .15s;
+  }
+  .mrow:last-child { border-bottom: none; }
+  .mrow:hover { background: var(--color-surface-hover); }
+  .mrow .name { font-weight: 500; font-size: 0.92rem; }
+  .mrow .meta { font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px; }
+  .mrow .usage { font-size: 0.78rem; }
+  .mrow .usage-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .mrow .expiry { font-size: 0.78rem; color: var(--color-text-secondary); }
+  @media (max-width: 1100px) { .mrow { grid-template-columns: 1fr 1fr auto; } .mrow .usage, .mrow .expiry { display: none; } }
+
+  /* ───── Section grid ───── */
+  .grid-2 { display: grid; grid-template-columns: 7fr 5fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-form { display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
+  @media (max-width: 1200px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-form { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ───── Rule card (mandate detail) ───── */
+  .rule {
+    padding: 18px 20px; background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: 12px;
+  }
+  .rule .rlbl { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 8px; display:flex; align-items: center; gap: 6px; }
+  .rule .rval { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; }
+  .rule .rval .unit { font-size: 0.72rem; color: var(--color-text-secondary); margin-left: 6px; font-weight: 400; }
+  .rule .rsub { font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 6px; }
+
+  /* ───── Stepper (vault) ───── */
+  .stepper { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .stepper .step {
+    flex: 1; padding: 12px 16px;
+    border: 1px solid var(--color-border); border-radius: 10px;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--color-surface);
+  }
+  .stepper .step.active { border-color: var(--color-accent); background: var(--color-accent-soft); }
+  .stepper .step.done { border-color: rgba(79, 209, 197, 0.4); background: rgba(79, 209, 197, 0.08); }
+  .stepper .num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--color-bg); border: 1px solid var(--color-border);
+    display: grid; place-items: center;
+    font-size: 0.74rem; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .stepper .step.active .num { background: var(--color-accent); color: var(--color-accent-ink); border-color: var(--color-accent); }
+  .stepper .step.done .num { background: var(--color-safe); color: var(--color-accent-ink); border-color: var(--color-safe); }
+  .stepper .lbl { font-size: 0.84rem; font-weight: 500; }
+  .stepper .arrow { color: var(--color-text-secondary); font-size: 0.9rem; }
+
+  /* ───── Preview panel (create mandate) ───── */
+  .preview {
+    padding: 24px; background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: 14px;
+    position: sticky; top: 88px;
+  }
+  .preview-label {
+    font-size: 0.68rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 16px;
+  }
+  .preview-row {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--color-border); font-size: 0.84rem;
+  }
+  .preview-row:last-of-type { border-bottom: none; }
+  .preview-row .k { color: var(--color-text-secondary); }
+  .preview-row .v { font-weight: 500; text-align: right; }
+  @media (max-width: 1200px) { .preview { position: static; } }
+
+  /* ───── Filter chip ───── */
+  .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 8px 14px; background: transparent;
+    border: 1px solid var(--color-border); border-radius: 999px;
+    font-family: inherit; font-size: 0.78rem; font-weight: 500;
+    color: var(--color-text-secondary);
+    transition: all .2s;
+  }
+  .filter-chip:hover { border-color: var(--color-accent); color: var(--color-text-primary); }
+  .filter-chip.on { background: var(--color-accent-soft); border-color: var(--color-accent); color: var(--color-accent); }
+  .filter-chip .count { opacity: 0.6; margin-left: 6px; font-weight: 400; }
+
+  /* ───── InfoTip ───── */
+  .tip {
+    display: inline-grid; place-items: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.62rem; font-weight: 600; cursor: help;
+    position: relative;
+  }
+  .tip::after {
+    content: attr(data-tip);
+    position: absolute; top: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 12px;
+    background: var(--color-bg); border: 1px solid var(--color-border);
+    border-radius: 6px; font-size: 0.74rem; font-weight: 400;
+    color: var(--color-text-primary);
+    width: 240px; text-align: left; line-height: 1.4;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+    z-index: 20;
+  }
+  .tip:hover::after { opacity: 1; }
+
+  /* ───── APY card ───── */
+  .apy-card {
+    padding: 18px 20px; background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: 12px;
+    cursor: pointer; transition: border-color .2s, transform .2s;
+  }
+  .apy-card:hover { border-color: var(--color-accent); transform: translateY(-2px); }
+  .apy-card .pool { font-weight: 500; font-size: 0.9rem; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .apy-card .rate { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; }
+  .apy-card .rate .unit { font-size: 0.72rem; color: var(--color-text-secondary); margin-left: 4px; font-weight: 400; }
+  .apy-card .trend { font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 4px; }
+
+  /* ───── Verdict panel (agent console) ───── */
+  .verdict-panel {
+    padding: 24px; border-radius: 14px; margin-top: 20px;
+    display: flex; align-items: flex-start; gap: 20px;
+    border: 1px solid;
+  }
+  .verdict-panel.allowed { background: rgba(79, 209, 197, 0.06); border-color: rgba(79, 209, 197, 0.3); }
+  .verdict-panel.approval { background: rgba(232, 181, 76, 0.06); border-color: rgba(232, 181, 76, 0.3); }
+  .verdict-panel.denied { background: rgba(229, 72, 77, 0.06); border-color: rgba(229, 72, 77, 0.3); }
+  .verdict-panel .big-badge {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 1.5rem; font-weight: 600; flex-shrink: 0;
+  }
+  .verdict-panel.allowed .big-badge { background: rgba(79, 209, 197, 0.15); color: var(--color-safe); }
+  .verdict-panel.approval .big-badge { background: rgba(232, 181, 76, 0.15); color: var(--color-warning); }
+  .verdict-panel.denied .big-badge { background: rgba(229, 72, 77, 0.15); color: var(--color-danger); }
+  .verdict-panel h4 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .verdict-panel p { color: var(--color-text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 10px; }
+  .verdict-panel .reasoning {
+    font-size: 0.78rem; color: var(--color-text-primary);
+    background: rgba(0, 0, 0, 0.25); padding: 10px 14px;
+    border-radius: 6px; border-left: 2px solid currentColor; margin-top: 10px;
+  }
+
+  /* ───── Rule check rows (agent console) ───── */
+  .checks {
+    margin-top: 16px; border-top: 1px solid var(--color-border); padding-top: 16px;
+  }
+  .check {
+    display: grid; grid-template-columns: 24px 1fr auto;
+    gap: 12px; padding: 8px 0; align-items: center;
+    font-size: 0.86rem;
+  }
+  .check .mark { font-weight: 600; font-size: 0.9rem; }
+  .check.pass .mark { color: var(--color-safe); }
+  .check.fail .mark { color: var(--color-danger); }
+  .check.skip .mark { color: var(--color-text-secondary); }
+  .check.trigger .mark { color: var(--color-warning); }
+  .check .label { color: var(--color-text-primary); }
+  .check .value { font-size: 0.76rem; color: var(--color-text-secondary); }
+
+  /* Mobile tweaks */
+  @media (max-width: 820px) {
+    .sidebar {
+      position: fixed; left: 0; top: 0; z-index: 40;
+      transform: translateX(-100%); transition: transform .3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .content { padding: 20px 16px; }
+    .topbar { padding: 0 16px; }
+    .page-head { flex-direction: column; align-items: stretch; }
+    .addr-pill { display: none; }
+  }
+  .menu-toggle {
+    display: none; background: transparent; border: 1px solid var(--color-border);
+    width: 36px; height: 36px; border-radius: 8px; color: var(--color-text-primary);
+  }
+  @media (max-width: 820px) { .menu-toggle { display: inline-grid; place-items: center; } }
+</style>
+</head>
+<body>
+
+<!-- ─────────────────────── Sidebar ─────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <a class="brand" data-view="dashboard">
+    <span class="seal">M</span><span>MandateFi</span>
+  </a>
+  <nav>
+    <div class="nav-group">
+      <div class="nav-group-label">Overview</div>
+      <a class="nav-item" data-view="dashboard"><span class="ic">▣</span>Dashboard</a>
+    </div>
+    <div class="nav-group" style="margin-top: 18px;">
+      <div class="nav-group-label">Capital</div>
+      <a class="nav-item" data-view="vault"><span class="ic">◧</span>Vault</a>
+    </div>
+    <div class="nav-group" style="margin-top: 18px;">
+      <div class="nav-group-label">Mandates</div>
+      <a class="nav-item" data-view="create"><span class="ic">+</span>Create mandate</a>
+      <a class="nav-item" data-view="detail"><span class="ic">⟐</span>Mandate detail</a>
+    </div>
+    <div class="nav-group" style="margin-top: 18px;">
+      <div class="nav-group-label">Operations</div>
+      <a class="nav-item" data-view="agent"><span class="ic">◉</span>Agent console</a>
+      <a class="nav-item" data-view="trace"><span class="ic">≡</span>Policy trace</a>
+    </div>
+  </nav>
+  <div class="sidebar-foot">
+    <div class="flag">Testnet MVP</div>
+    Sepolia · USDC · do not deposit real funds.
+  </div>
+</aside>
+
+<div class="main">
+  <!-- ─── Topbar ─── -->
+  <header class="topbar">
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">≡</button>
+    <div class="crumbs">
+      <span>MandateFi</span><span class="sep">/</span>
+      <span class="current" id="crumb">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <span class="net-pill"><span class="dot"></span>Sepolia · 11155111</span>
+      <span class="addr-pill"><span class="av"></span>0xa94c…37f1</span>
+      <button class="btn btn-ghost btn-sm">Disconnect</button>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- ══════════════════════════ VIEW: DASHBOARD ══════════════════════════ -->
+    <section class="view" data-view="dashboard">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <div class="sub">Live account overview · Ethereum Sepolia</div>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-ghost btn-sm">Refresh ↻</button>
+          <button class="btn btn-primary btn-sm" data-view="create">+ New mandate</button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="lbl">Vault balance <span class="tip" data-tip="Total USDC held by the MandateVault contract on your behalf. Always withdrawable to your wallet.">?</span></div>
+          <div class="val">12,480<span class="unit">USDC</span></div>
+          <div class="delta up">+320 today</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Wallet balance</div>
+          <div class="val">2,340<span class="unit">USDC</span></div>
+          <div class="delta">Available to deposit</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Active mandates</div>
+          <div class="val">2 <span class="unit">of 4 total</span></div>
+          <div class="delta">1 paused · 1 revoked</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Daily limit used <span class="tip" data-tip="Combined usage across all active mandates against today's cap. Resets on-chain at midnight UTC.">?</span></div>
+          <div class="val">320<span class="unit">/ 500 USDC</span></div>
+          <div class="progress warn" style="margin-top: 4px;"><div class="fill" style="width: 64%;"></div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="glass" style="margin-bottom: 20px;">
+            <div class="panel-head">
+              <h3>Active mandates</h3>
+              <a class="sub" data-view="detail" style="color: var(--color-accent);">View all →</a>
+            </div>
+            <div class="mrow" data-view="detail">
+              <div>
+                <div class="name">Stable Rebalancer v1</div>
+                <div class="meta">#1 · Agent 0x7b3e…92fa</div>
+              </div>
+              <div class="usage">
+                <div class="usage-top"><span>Daily</span><span>320 / 500</span></div>
+                <div class="progress warn"><div class="fill" style="width: 64%;"></div></div>
+              </div>
+              <span class="badge active">● Active</span>
+              <div class="expiry">Exp. 2026-12-31</div>
+              <span style="color: var(--color-text-secondary);">→</span>
+            </div>
+            <div class="mrow" data-view="detail">
+              <div>
+                <div class="name">Compound-only</div>
+                <div class="meta">#3 · Agent 0x1a2b…cc33</div>
+              </div>
+              <div class="usage">
+                <div class="usage-top"><span>Daily</span><span>0 / 1,000</span></div>
+                <div class="progress"><div class="fill" style="width: 0%;"></div></div>
+              </div>
+              <span class="badge active">● Active</span>
+              <div class="expiry">Exp. 2027-03-14</div>
+              <span style="color: var(--color-text-secondary);">→</span>
+            </div>
+          </div>
+
+          <div class="glass">
+            <div class="panel-head">
+              <h3>APY feed <span style="color: var(--color-warning); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px;">// RIALO: mock</span></h3>
+              <span class="sub">Updated 14:12 UTC</span>
+            </div>
+            <div class="panel-body" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+              <div class="apy-card">
+                <div class="pool">Aave v3 <span style="color: var(--color-safe); font-size: 0.72rem;">↑</span></div>
+                <div class="rate">4.82<span class="unit">%</span></div>
+                <div class="trend">+0.14 (24h)</div>
+              </div>
+              <div class="apy-card">
+                <div class="pool">Compound v3 <span style="color: var(--color-danger); font-size: 0.72rem;">↓</span></div>
+                <div class="rate">3.95<span class="unit">%</span></div>
+                <div class="trend">−0.22 (24h)</div>
+              </div>
+              <div class="apy-card">
+                <div class="pool">Stable Reserve <span style="color: var(--color-text-secondary); font-size: 0.72rem;">—</span></div>
+                <div class="rate">2.10<span class="unit">%</span></div>
+                <div class="trend">Reserve floor</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div class="panel-head">
+            <h3>Recent policy trace</h3>
+            <a class="sub" data-view="trace" style="color: var(--color-accent);">All →</a>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:07:52 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>500 USDC</strong> → Unknown pool</div>
+            </div>
+            <span class="badge denied">✕ Denied</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:04:38 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>320 USDC</strong> → Compound v3</div>
+            </div>
+            <span class="badge approval">○ Approval</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:02:11 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>120 USDC</strong> → Aave v3</div>
+            </div>
+            <span class="badge allowed">● Allowed</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">13:48:50 · M#3 · AGENT 0x1a2b…</div>
+              <div class="desc">Rebalance <strong>80 USDC</strong> → Compound v3</div>
+            </div>
+            <span class="badge allowed">● Allowed</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">13:30:04 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Transfer <strong>200 USDC</strong> → Stable Reserve (APY trigger)</div>
+            </div>
+            <span class="badge allowed">● Allowed</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ VIEW: VAULT ══════════════════════════ -->
+    <section class="view" data-view="vault">
+      <div class="page-head">
+        <div>
+          <h1>Vault</h1>
+          <div class="sub">Deposit and withdraw test USDC on Sepolia</div>
+        </div>
+      </div>
+
+      <div class="stat-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 720px;">
+        <div class="stat">
+          <div class="lbl">Wallet balance</div>
+          <div class="val">2,340.00<span class="unit">USDC</span></div>
+          <div class="delta">0xa94c…37f1</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Vault balance</div>
+          <div class="val">12,480.00<span class="unit">USDC</span></div>
+          <div class="delta up">+320 today</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-section">
+            <h3>Transfer</h3>
+            <p class="section-sub">Approve the ERC-20 allowance first, then deposit into the vault.</p>
+
+            <div class="toggle" style="margin-bottom: 20px;">
+              <button class="on" data-op="deposit">Deposit</button>
+              <button data-op="withdraw">Withdraw</button>
+            </div>
+
+            <div class="stepper">
+              <div class="step done">
+                <span class="num">1</span><span class="lbl">Approve USDC</span>
+              </div>
+              <span class="arrow">→</span>
+              <div class="step active">
+                <span class="num">2</span><span class="lbl">Deposit</span>
+              </div>
+              <span class="arrow">→</span>
+              <div class="step">
+                <span class="num">3</span><span class="lbl">Confirmed</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Amount <span class="tip" data-tip="USDC uses 6 decimals on Ethereum. Enter the amount in whole USDC.">?</span></label>
+              <div class="input-group">
+                <input type="text" value="500.00" />
+                <span class="suffix">USDC · <a style="color: var(--color-accent);">Max</a></span>
+              </div>
+              <div class="hint">Available: 2,340.00 USDC</div>
+            </div>
+
+            <div style="padding: 14px 16px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 8px;">
+                <span style="color: var(--color-text-secondary);">You deposit</span>
+                <span style="font-weight: 500;">500.00 USDC</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 8px;">
+                <span style="color: var(--color-text-secondary);">New vault balance</span>
+                <span style="font-weight: 500;">12,980.00 USDC</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+                <span style="color: var(--color-text-secondary);">Estimated gas</span>
+                <span style="font-weight: 500;">~0.0012 ETH</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-wide">Deposit 500 USDC → MandateVault</button>
+            <div class="hint" style="margin-top: 10px; text-align: center;">
+              Opens your wallet to sign the transaction on Sepolia.
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="glass">
+            <div class="panel-head">
+              <h3>History</h3>
+              <span class="sub">Last 30 days</span>
+            </div>
+            <table>
+              <thead>
+                <tr><th>When</th><th>Type</th><th class="num-cell">Amount</th><th>Tx</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Oct 1 · 14:12</td><td><span class="badge allowed" style="font-size: 0.62rem;">Deposit</span></td><td class="num-cell">+320.00</td><td><code>0x8f3a…b721 ↗</code></td></tr>
+                <tr><td>Sep 29 · 09:48</td><td><span class="badge allowed" style="font-size: 0.62rem;">Deposit</span></td><td class="num-cell">+2,000.00</td><td><code>0x4e1c…ff02 ↗</code></td></tr>
+                <tr><td>Sep 24 · 17:21</td><td><span class="badge denied" style="font-size: 0.62rem;">Withdraw</span></td><td class="num-cell">−140.00</td><td><code>0xa5c8…11ed ↗</code></td></tr>
+                <tr><td>Sep 20 · 11:03</td><td><span class="badge allowed" style="font-size: 0.62rem;">Deposit</span></td><td class="num-cell">+10,000.00</td><td><code>0x6b4d…5fa9 ↗</code></td></tr>
+                <tr><td>Sep 18 · 14:00</td><td><span class="badge allowed" style="font-size: 0.62rem;">Deposit</span></td><td class="num-cell">+300.00</td><td><code>0x2a92…c8d1 ↗</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ VIEW: CREATE MANDATE ══════════════════════════ -->
+    <section class="view" data-view="create">
+      <div class="page-head">
+        <div>
+          <h1>Create mandate</h1>
+          <div class="sub">Define the rules an agent must stay within. Signed on-chain by your Sepolia wallet.</div>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-ghost btn-sm">Save draft</button>
+          <button class="btn btn-primary btn-sm">Sign mandate → Sepolia</button>
+        </div>
+      </div>
+
+      <div class="grid-form">
+        <div>
+          <div class="form-section">
+            <h3>Basics</h3>
+            <p class="section-sub">Identify this mandate and the agent allowed to propose actions.</p>
+            <div class="field">
+              <label>Mandate name</label>
+              <input type="text" value="Stable Rebalancer v2" placeholder="e.g. Stable Rebalancer v2" />
+              <div class="hint">Local label only — not stored on-chain. Helps you recognize this mandate in the UI.</div>
+            </div>
+            <div class="field">
+              <label>Agent address <span class="tip" data-tip="The on-chain address allowed to submit proposals under this mandate. Never share your owner key with it.">?</span></label>
+              <input type="text" value="0x7b3eA2bE1a9c4F7C8f3b11D04d4F7c48D92fAa" />
+              <div class="hint">An EOA or a bot contract. Only this address can call `propose()` with this mandate id.</div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Approved destinations</h3>
+            <p class="section-sub">The agent can only move funds into addresses in this list.</p>
+            <div class="chip-list" style="margin-bottom: 12px;">
+              <span class="chip">Aave v3 USDC Reserve <span class="x">×</span></span>
+              <span class="chip">Compound v3 USDC Market <span class="x">×</span></span>
+              <span class="chip">Stable Reserve (owner) <span class="x">×</span></span>
+              <button class="chip-add">+ Add destination</button>
+            </div>
+            <div class="hint">Add a pool contract address or an ENS. Sepolia faucet pools are preloaded for convenience.</div>
+          </div>
+
+          <div class="form-section">
+            <h3>Limits</h3>
+            <p class="section-sub">Hard caps enforced in Solidity. The daily window resets on-chain at midnight UTC.</p>
+            <div class="field-row">
+              <div class="field">
+                <label>Per-tx limit <span class="tip" data-tip="Maximum USDC movable in a single proposal. Enforced via custom error ExceedsPerTxLimit(amount, limit).">?</span></label>
+                <div class="input-group">
+                  <input type="text" value="200" />
+                  <span class="suffix">USDC</span>
+                </div>
+              </div>
+              <div class="field">
+                <label>Daily limit <span class="tip" data-tip="Maximum USDC movable across all proposals today. Rolls over on day boundary (block.timestamp / 1 days).">?</span></label>
+                <div class="input-group">
+                  <input type="text" value="500" />
+                  <span class="suffix">USDC</span>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Approval threshold <span class="tip" data-tip="Proposals strictly above this amount require your signature even if below the per-tx limit.">?</span></label>
+              <div class="input-group">
+                <input type="text" value="200" />
+                <span class="suffix">USDC</span>
+              </div>
+              <div class="hint">If `amount &gt; threshold` the executor returns REQUIRES_APPROVAL instead of executing.</div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>APY trigger &amp; reserve</h3>
+            <p class="section-sub">Auto-move funds to a safe destination when yield falls below a floor.</p>
+            <div class="field-row">
+              <div class="field">
+                <label>APY floor <span class="tip" data-tip="Expressed in basis points. 500 = 5.00% APY.">?</span></label>
+                <div class="input-group">
+                  <input type="text" value="500" />
+                  <span class="suffix">bps · 5.00%</span>
+                </div>
+              </div>
+              <div class="field">
+                <label>Stable reserve</label>
+                <select>
+                  <option>Stable Reserve (owner)</option>
+                  <option>USDC balance in vault</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Execution &amp; expiry</h3>
+            <p class="section-sub">Decide whether the agent auto-executes allowed proposals or always waits for you.</p>
+            <div class="field">
+              <label>Execution mode</label>
+              <div class="toggle">
+                <button class="on">AutoExecute</button>
+                <button>RequireApproval</button>
+              </div>
+              <div class="hint">In <code>RequireApproval</code> mode every proposal — even ALLOWED ones — waits for your signature.</div>
+            </div>
+            <div class="field">
+              <label>Expiry</label>
+              <input type="date" value="2026-12-31" />
+              <div class="hint">After this date, every proposal returns `DENIED` with `MandateExpired(uint256 at)`.</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="preview">
+          <div class="preview-label">Mandate preview</div>
+          <div class="preview-row"><span class="k">Name</span><span class="v">Stable Rebalancer v2</span></div>
+          <div class="preview-row"><span class="k">Agent</span><span class="v" style="font-size: 0.76rem;">0x7b3e…92fa</span></div>
+          <div class="preview-row"><span class="k">Destinations</span><span class="v">3 pools</span></div>
+          <div class="preview-row"><span class="k">Per-tx limit</span><span class="v">200 USDC</span></div>
+          <div class="preview-row"><span class="k">Daily limit</span><span class="v">500 USDC</span></div>
+          <div class="preview-row"><span class="k">Approval ≥</span><span class="v">200 USDC</span></div>
+          <div class="preview-row"><span class="k">APY floor</span><span class="v">5.00% (500 bps)</span></div>
+          <div class="preview-row"><span class="k">Mode</span><span class="v">AutoExecute</span></div>
+          <div class="preview-row"><span class="k">Expiry</span><span class="v">2026-12-31</span></div>
+
+          <div style="margin-top: 20px; padding: 14px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.76rem; color: var(--color-text-secondary); line-height: 1.5;">
+            Signing calls <code>MandateRegistry.createMandate(params)</code> and emits <code>MandateCreated(id, owner, agent)</code>.
+          </div>
+          <button class="btn btn-primary btn-wide" style="margin-top: 16px;">Sign mandate → Sepolia</button>
+          <button class="btn btn-ghost btn-wide" style="margin-top: 8px;">Save as draft</button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ VIEW: MANDATE DETAIL ══════════════════════════ -->
+    <section class="view" data-view="detail">
+      <div class="page-head" style="align-items: flex-start;">
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+            <span style="font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-secondary);">Mandate #1</span>
+            <span class="badge active">● Active</span>
+            <span style="font-size: 0.76rem; color: var(--color-text-secondary);">AutoExecute · Expires 2026-12-31 (14 months)</span>
+          </div>
+          <h1>Stable Rebalancer v1</h1>
+          <div class="sub">Agent 0x7b3eA2bE1a9c4F7C8f3b11D04d4F7c48D92fAa</div>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-ghost btn-sm">⏸ Pause</button>
+          <button class="btn btn-danger btn-sm">⊘ Revoke</button>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-bottom: 20px;">
+        <div class="rule">
+          <div class="rlbl">Per-tx limit <span class="tip" data-tip="Reverts with ExceedsPerTxLimit(amount, 200e6) above this cap.">?</span></div>
+          <div class="rval">200<span class="unit">USDC</span></div>
+          <div class="rsub">Hard cap per proposal</div>
+        </div>
+        <div class="rule">
+          <div class="rlbl">Daily limit <span class="tip" data-tip="Sum of all approvals today. Resets on-chain at UTC midnight.">?</span></div>
+          <div class="rval">500<span class="unit">USDC</span></div>
+          <div class="rsub">Used today: <strong style="color: var(--color-warning);">320 USDC</strong> (64%)</div>
+          <div class="progress warn" style="margin-top: 8px;"><div class="fill" style="width: 64%;"></div></div>
+        </div>
+        <div class="rule">
+          <div class="rlbl">Approval threshold</div>
+          <div class="rval">200<span class="unit">USDC</span></div>
+          <div class="rsub">Over this → owner sign required</div>
+        </div>
+        <div class="rule">
+          <div class="rlbl">APY trigger</div>
+          <div class="rval">5.00<span class="unit">% (500 bps)</span></div>
+          <div class="rsub">Below floor → auto move to Stable Reserve</div>
+        </div>
+        <div class="rule">
+          <div class="rlbl">Execution mode</div>
+          <div class="rval" style="font-size: 1rem;">AutoExecute</div>
+          <div class="rsub">ALLOWED verdicts execute immediately</div>
+        </div>
+        <div class="rule">
+          <div class="rlbl">Expiry</div>
+          <div class="rval" style="font-size: 1rem;">2026-12-31</div>
+          <div class="rsub">After which all proposals DENIED</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="glass">
+          <div class="panel-head">
+            <h3>Approved destinations</h3>
+            <span class="sub">3 pools · Allowlist only</span>
+          </div>
+          <div class="panel-body">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; padding: 12px 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px;">
+                <div>
+                  <div style="font-weight: 500; font-size: 0.9rem;">Aave v3 USDC Reserve</div>
+                  <div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x5425…7D1A</div>
+                </div>
+                <span style="font-size: 0.78rem; color: var(--color-safe); align-self: center;">4.82% APY</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 12px 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px;">
+                <div>
+                  <div style="font-weight: 500; font-size: 0.9rem;">Compound v3 USDC Market</div>
+                  <div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0xA17b…04e3</div>
+                </div>
+                <span style="font-size: 0.78rem; color: var(--color-safe); align-self: center;">3.95% APY</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 12px 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px;">
+                <div>
+                  <div style="font-weight: 500; font-size: 0.9rem;">Stable Reserve (owner)</div>
+                  <div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0xa94c…37f1</div>
+                </div>
+                <span style="font-size: 0.78rem; color: var(--color-text-secondary); align-self: center;">Reserve</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div class="panel-head">
+            <h3>Recent proposals · M#1</h3>
+            <a class="sub" data-view="trace" style="color: var(--color-accent);">Full trace →</a>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:07:52 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>500 USDC</strong> → Unknown pool</div>
+            </div>
+            <span class="badge denied">Denied</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:04:38 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>320 USDC</strong> → Compound v3</div>
+            </div>
+            <span class="badge approval">Approval</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:02:11 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>120 USDC</strong> → Aave v3</div>
+            </div>
+            <span class="badge allowed">Allowed</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">13:30:04 · AGENT 0x7b3e…</div>
+              <div class="desc">Transfer <strong>200 USDC</strong> → Stable Reserve <span style="color: var(--color-warning); font-size: 0.72rem;">APY trigger</span></div>
+            </div>
+            <span class="badge allowed">Allowed</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ VIEW: AGENT CONSOLE ══════════════════════════ -->
+    <section class="view" data-view="agent">
+      <div class="page-head">
+        <div>
+          <h1>Agent console</h1>
+          <div class="sub">Compose a proposal and run it against the active mandate. Nothing moves until the executor returns a verdict.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-section">
+            <h3>New proposal</h3>
+            <p class="section-sub">The agent builds a rebalance proposal. The executor is called read-only until you ship it.</p>
+
+            <div class="field">
+              <label>Mandate</label>
+              <select>
+                <option>#1 · Stable Rebalancer v1 (Active)</option>
+                <option>#3 · Compound-only (Active)</option>
+              </select>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Amount</label>
+                <div class="input-group">
+                  <input type="text" value="320" />
+                  <span class="suffix">USDC</span>
+                </div>
+                <div class="hint">Per-tx limit: 200 USDC</div>
+              </div>
+              <div class="field">
+                <label>Destination</label>
+                <select>
+                  <option>Compound v3 USDC Market</option>
+                  <option>Aave v3 USDC Reserve</option>
+                  <option>Stable Reserve (owner)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Reason (optional)</label>
+              <textarea rows="2" placeholder="APY delta: Compound v3 +0.14% vs Aave v3 since 13:00 UTC">APY delta · Compound v3 3.95% ↓ vs Aave v3 4.82% ↑ · move surplus to higher-yield reserve.</textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-ghost btn-wide">Dry-run against policy</button>
+              <button class="btn btn-primary btn-wide">Submit proposal</button>
+            </div>
+          </div>
+
+          <div class="verdict-panel approval">
+            <div class="big-badge">○</div>
+            <div style="flex: 1;">
+              <h4>REQUIRES_APPROVAL · Owner signature needed</h4>
+              <p>The proposal cleared destination and per-tx checks but exceeds your approval threshold.</p>
+              <div class="reasoning">
+                320 USDC &gt; 200 USDC (approvalThreshold) · routed to <code>REQUIRES_APPROVAL</code> at rule 7.
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 16px;">
+                <button class="btn btn-primary btn-sm">Sign approval → Sepolia</button>
+                <button class="btn btn-ghost btn-sm">Reject</button>
+                <button class="btn btn-ghost btn-sm" style="margin-left: auto;" data-view="trace">View in trace →</button>
+              </div>
+
+              <div class="checks">
+                <div class="check pass">
+                  <span class="mark">✓</span><span class="label">Mandate is Active</span><span class="value">status.Active</span>
+                </div>
+                <div class="check pass">
+                  <span class="mark">✓</span><span class="label">Not expired</span><span class="value">14 months remain</span>
+                </div>
+                <div class="check pass">
+                  <span class="mark">✓</span><span class="label">Caller is the mandate agent</span><span class="value">0x7b3e…</span>
+                </div>
+                <div class="check pass">
+                  <span class="mark">✓</span><span class="label">Destination is approved</span><span class="value">Compound v3</span>
+                </div>
+                <div class="check pass">
+                  <span class="mark">✓</span><span class="label">Amount within per-tx limit</span><span class="value">320 &lt; 200? ✕… wait</span>
+                </div>
+                <div class="check fail">
+                  <span class="mark">✕</span><span class="label">Amount within per-tx limit (actually fails)</span><span class="value">320 &gt; 200</span>
+                </div>
+                <div class="check skip">
+                  <span class="mark">—</span><span class="label">Within daily remainder</span><span class="value">skipped</span>
+                </div>
+                <div class="check trigger">
+                  <span class="mark">!</span><span class="label">Above approval threshold</span><span class="value">routed to REQUIRES_APPROVAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div class="panel-head">
+            <h3>APY feed <span style="color: var(--color-warning); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px;">// RIALO: mock</span></h3>
+            <span class="sub">Updated 14:12 UTC</span>
+          </div>
+          <table>
+            <thead><tr><th>Pool</th><th class="num-cell">APY</th><th class="num-cell">24h</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div style="font-weight: 500;">Aave v3 USDC</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x5425…7D1A</div></td>
+                <td class="num-cell" style="font-weight: 600; color: var(--color-safe);">4.82%</td>
+                <td class="num-cell" style="color: var(--color-safe);">+0.14</td>
+              </tr>
+              <tr>
+                <td><div style="font-weight: 500;">Compound v3 USDC</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0xA17b…04e3</div></td>
+                <td class="num-cell" style="font-weight: 600;">3.95%</td>
+                <td class="num-cell" style="color: var(--color-danger);">−0.22</td>
+              </tr>
+              <tr>
+                <td><div style="font-weight: 500;">Stable Reserve</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0xa94c…37f1</div></td>
+                <td class="num-cell" style="font-weight: 600;">2.10%</td>
+                <td class="num-cell" style="color: var(--color-text-secondary);">—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding: 14px 20px; border-top: 1px solid var(--color-border); font-size: 0.72rem; color: var(--color-text-secondary); line-height: 1.5;">
+            <strong style="color: var(--color-warning);">// RIALO:</strong> oracle values are owner-updated via <code>MockYieldOracle.setApy(pool, bps)</code> in this testnet build. On Rialo this will come from native webcalls.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════ VIEW: POLICY TRACE ══════════════════════════ -->
+    <section class="view" data-view="trace">
+      <div class="page-head">
+        <div>
+          <h1>Policy trace</h1>
+          <div class="sub">Every proposal evaluated by PolicyExecutor, decoded into plain English.</div>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-ghost btn-sm">Export CSV</button>
+          <button class="btn btn-ghost btn-sm">Refresh ↻</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip on">All <span class="count">42</span></button>
+        <button class="filter-chip">Allowed <span class="count">28</span></button>
+        <button class="filter-chip">Requires approval <span class="count">9</span></button>
+        <button class="filter-chip">Denied <span class="count">5</span></button>
+        <div style="flex: 1;"></div>
+        <select class="filter-chip" style="padding: 7px 12px;">
+          <option>All mandates</option>
+          <option>#1 · Stable Rebalancer v1</option>
+          <option>#3 · Compound-only</option>
+        </select>
+        <select class="filter-chip" style="padding: 7px 12px;">
+          <option>Last 24h</option>
+          <option>Last 7 days</option>
+          <option>All time</option>
+        </select>
+      </div>
+
+      <div class="glass">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Mandate · Agent</th>
+              <th class="num-cell">Amount</th>
+              <th>Destination</th>
+              <th>Verdict</th>
+              <th>Rule hit</th>
+              <th>Tx</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div>Oct 1 · 14:07:52</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,984</div></td>
+              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
+              <td class="num-cell"><strong>500.00</strong> USDC</td>
+              <td><code>Unknown pool</code></td>
+              <td><span class="badge denied">✕ Denied</span></td>
+              <td style="font-size: 0.78rem;">Destination not approved <span class="tip" data-tip="DestinationNotApproved(address) · rule 4 of 8">?</span></td>
+              <td><code>0x8f3a…b721 ↗</code></td>
+            </tr>
+            <tr>
+              <td><div>Oct 1 · 14:04:38</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,981</div></td>
+              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
+              <td class="num-cell"><strong>320.00</strong> USDC</td>
+              <td>Compound v3</td>
+              <td><span class="badge approval">○ Approval</span></td>
+              <td style="font-size: 0.78rem;">Over approval threshold (200 USDC)</td>
+              <td><code>0x4e1c…ff02 ↗</code></td>
+            </tr>
+            <tr>
+              <td><div>Oct 1 · 14:02:11</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,977</div></td>
+              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
+              <td class="num-cell"><strong>120.00</strong> USDC</td>
+              <td>Aave v3</td>
+              <td><span class="badge allowed">● Allowed</span></td>
+              <td style="font-size: 0.78rem;">All checks passed</td>
+              <td><code>0xa5c8…11ed ↗</code></td>
+            </tr>
+            <tr>
+              <td><div>Oct 1 · 13:48:50</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,946</div></td>
+              <td><div style="font-weight: 500;">M#3 Compound-only</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x1a2b…cc33</div></td>
+              <td class="num-cell"><strong>80.00</strong> USDC</td>
+              <td>Compound v3</td>
+              <td><span class="badge allowed">● Allowed</span></td>
+              <td style="font-size: 0.78rem;">All checks passed</td>
+              <td><code>0x6b4d…5fa9 ↗</code></td>
+            </tr>
+            <tr>
+              <td><div>Oct 1 · 13:30:04</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,912</div></td>
+              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
+              <td class="num-cell"><strong>200.00</strong> USDC</td>
+              <td>Stable Reserve</td>
+              <td><span class="badge allowed">● Allowed</span></td>
+              <td style="font-size: 0.78rem;">APY trigger · Compound &lt; 5.00% floor</td>
+              <td><code>0x2a92…c8d1 ↗</code></td>
+            </tr>
+            <tr>
+              <td><div>Oct 1 · 13:10:40</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,874</div></td>
+              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
+              <td class="num-cell"><strong>1,200.00</strong> USDC</td>
+              <td>Aave v3</td>
+              <td><span class="badge denied">✕ Denied</span></td>
+              <td style="font-size: 0.78rem;">Exceeds per-tx limit (200 USDC)</td>
+              <td><code>0xd1b4…09c2 ↗</code></td>
+            </tr>
+            <tr>
+              <td><div>Oct 1 · 12:52:16</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,837</div></td>
+              <td><div style="font-weight: 500;">M#3 Compound-only</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x1a2b…cc33</div></td>
+              <td class="num-cell"><strong>50.00</strong> USDC</td>
+              <td>Compound v3</td>
+              <td><span class="badge allowed">● Allowed</span></td>
+              <td style="font-size: 0.78rem;">All checks passed</td>
+              <td><code>0x7f22…bc1a ↗</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 16px; padding: 14px 18px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.78rem; color: var(--color-text-secondary); line-height: 1.5;">
+        <strong style="color: var(--color-text-primary);">Reading a denial:</strong> each event carries the typed custom error — e.g. <code>ExceedsPerTxLimit(1200e6, 200e6)</code> — which the UI decodes into "Exceeds per-tx limit (200 USDC)". Full trace lives on Sepolia; <code>0x…↗</code> links open Etherscan.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ─── Simple hash router + nav sync ───
+  (function () {
+    const views = Array.from(document.querySelectorAll('.view'));
+    const navItems = Array.from(document.querySelectorAll('[data-view]'));
+    const crumb = document.getElementById('crumb');
+    const sidebar = document.getElementById('sidebar');
+    const titles = {
+      dashboard: 'Dashboard',
+      vault: 'Vault',
+      create: 'Create mandate',
+      detail: 'Mandate detail',
+      agent: 'Agent console',
+      trace: 'Policy trace',
+    };
+
+    function go(name) {
+      const target = titles[name] ? name : 'dashboard';
+      views.forEach(v => v.classList.toggle('active', v.dataset.view === target));
+      navItems.forEach(n => {
+        if (n.classList.contains('nav-item')) {
+          n.classList.toggle('active', n.dataset.view === target);
+        }
+      });
+      crumb.textContent = titles[target];
+      document.title = `MandateFi · ${titles[target]}`;
+      sidebar.classList.remove('open');
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    function fromHash() {
+      const h = (location.hash || '#/dashboard').replace(/^#\/?/, '');
+      go(h);
+    }
+
+    // Delegate clicks on any [data-view]
+    document.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-view]');
+      if (!el) return;
+      // Allow default anchor behavior to be suppressed only when it looks navigational
+      e.preventDefault();
+      const name = el.dataset.view;
+      location.hash = '#/' + name;
+    });
+
+    window.addEventListener('hashchange', fromHash);
+    fromHash();
+
+    // Mobile menu toggle
+    const toggle = document.getElementById('menu-toggle');
+    if (toggle) {
+      toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    }
+  })();
+
+  // ─── Vault deposit/withdraw toggle (local only) ───
+  (function () {
+    const buttons = document.querySelectorAll('[data-op]');
+    buttons.forEach(b => b.addEventListener('click', () => {
+      buttons.forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    }));
+  })();
+
+  // ─── Filter chip toggle (policy trace) ───
+  (function () {
+    document.querySelectorAll('.filter-bar').forEach(bar => {
+      const chips = bar.querySelectorAll('.filter-chip:not(select)');
+      chips.forEach(chip => chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('on'));
+        chip.classList.add('on');
+      }));
+    });
+  })();
+
+  // ─── Execution mode toggle (create mandate) ───
+  (function () {
+    document.querySelectorAll('.form-section .toggle').forEach(tog => {
+      const bs = tog.querySelectorAll('button');
+      bs.forEach(b => b.addEventListener('click', () => {
+        bs.forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+      }));
+    });
+  })();
+</script>
+
+</body>
+</html>
