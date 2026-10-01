@@ -35,7 +35,32 @@
     -webkit-font-smoothing: antialiased;
     display: flex;
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
   }
+  /* Mesh grid overlay — subtle tech backdrop */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(232, 227, 213, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232, 227, 213, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at 50% 30%, black 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, black 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(232, 227, 213, 0.04), transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(63, 145, 255, 0.03), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .sidebar, .main { position: relative; z-index: 1; }
   a { color: inherit; text-decoration: none; cursor: pointer; }
   button { font-family: inherit; cursor: pointer; }
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
@@ -80,10 +105,12 @@
     background: var(--color-accent-soft);
     color: var(--color-accent);
     padding-left: 10px;
+    box-shadow: inset 0 0 0 1px rgba(232, 227, 213, 0.08);
   }
   .nav-item.active::before {
-    content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
+    content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
     width: 2px; background: var(--color-accent); border-radius: 2px;
+    box-shadow: 0 0 10px var(--color-accent);
   }
   .nav-item .ic {
     width: 16px; height: 16px; flex-shrink: 0;
@@ -130,6 +157,11 @@
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--color-safe);
     box-shadow: 0 0 8px var(--color-safe);
+    animation: pulse-safe 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse-safe {
+    0%, 100% { box-shadow: 0 0 6px var(--color-safe); }
+    50%      { box-shadow: 0 0 14px var(--color-safe); }
   }
   .addr-pill {
     display: inline-flex; align-items: center; gap: 8px;
@@ -158,10 +190,53 @@
 
   /* ───── View routing ───── */
   .view { display: none; }
-  .view.active { display: block; animation: fadeIn .25s cubic-bezier(0.22, 1, 0.36, 1); }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: none; }
+  .view.active {
+    display: block;
+    animation: viewIn .45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes viewIn {
+    from { opacity: 0; transform: translateY(10px); filter: blur(2px); }
+    to   { opacity: 1; transform: none; filter: blur(0); }
+  }
+
+  /* Route curtain — brief accent wipe when switching views */
+  .route-curtain {
+    position: fixed; inset: 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    pointer-events: none;
+    z-index: 100;
+  }
+  .route-curtain span {
+    background: var(--color-accent);
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: top center;
+  }
+  .route-curtain.on span {
+    animation: curtain .9s cubic-bezier(0.77, 0, 0.18, 1) forwards;
+  }
+  .route-curtain.on span:nth-child(1)  { animation-delay: 0ms; }
+  .route-curtain.on span:nth-child(2)  { animation-delay: 24ms; }
+  .route-curtain.on span:nth-child(3)  { animation-delay: 48ms; }
+  .route-curtain.on span:nth-child(4)  { animation-delay: 72ms; }
+  .route-curtain.on span:nth-child(5)  { animation-delay: 96ms; }
+  .route-curtain.on span:nth-child(6)  { animation-delay: 120ms; }
+  .route-curtain.on span:nth-child(7)  { animation-delay: 144ms; }
+  .route-curtain.on span:nth-child(8)  { animation-delay: 168ms; }
+  .route-curtain.on span:nth-child(9)  { animation-delay: 192ms; }
+  .route-curtain.on span:nth-child(10) { animation-delay: 216ms; }
+  .route-curtain.on span:nth-child(11) { animation-delay: 240ms; }
+  .route-curtain.on span:nth-child(12) { animation-delay: 264ms; }
+  @keyframes curtain {
+    0%   { transform: scaleY(0); opacity: 0; }
+    40%  { transform: scaleY(1); opacity: 0.85; }
+    100% { transform: scaleY(0); opacity: 0; transform-origin: bottom center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .view.active { animation: none; }
+    .route-curtain.on span { animation: none; }
   }
 
   /* ───── Glass panel ───── */
@@ -180,14 +255,39 @@
     gap: 16px; margin-bottom: 20px;
   }
   .stat {
+    position: relative;
     padding: 20px 22px;
-    background: var(--color-surface);
+    background:
+      linear-gradient(135deg, var(--color-surface) 0%, rgba(22, 18, 31, 0.9) 100%);
     border: 1px solid var(--color-border);
     border-radius: 14px;
     display: flex; flex-direction: column; gap: 10px;
-    transition: border-color .25s ease;
+    transition: border-color .3s ease, transform .35s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
   }
-  .stat:hover { border-color: rgba(232, 227, 213, 0.3); }
+  .stat::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-accent), transparent);
+    transform: translateX(-100%);
+    transition: transform .7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .stat::after {
+    content: '';
+    position: absolute; inset: auto -40% -60% auto;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(232, 227, 213, 0.06), transparent 65%);
+    opacity: 0;
+    transition: opacity .4s ease;
+    pointer-events: none;
+  }
+  .stat:hover {
+    border-color: rgba(232, 227, 213, 0.35);
+    transform: translateY(-2px);
+  }
+  .stat:hover::before { transform: translateX(0); }
+  .stat:hover::after { opacity: 1; }
   .stat .lbl {
     font-size: 0.7rem; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--color-text-secondary);
@@ -205,6 +305,168 @@
   .stat .delta.up { color: var(--color-safe); }
   .stat .delta.down { color: var(--color-danger); }
 
+  /* ───── Tech FX ───── */
+
+  /* Live dot — pulsing status indicator */
+  .live-dot {
+    display: inline-grid; place-items: center;
+    width: 10px; height: 10px;
+    position: relative;
+  }
+  .live-dot::before, .live-dot::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: 50%; background: var(--color-safe);
+  }
+  .live-dot::after {
+    animation: live-ring 2s ease-out infinite;
+    opacity: 0;
+  }
+  @keyframes live-ring {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    80%  { transform: scale(2.5); opacity: 0;   }
+    100% { transform: scale(2.5); opacity: 0;   }
+  }
+
+  /* Hex serial-code label */
+  .hex-id {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+  }
+  .hex-id::before { content: '0x'; opacity: 0.5; margin-right: 1px; }
+
+  /* Scanline — subtle horizontal moving glow */
+  .scan {
+    position: relative; overflow: hidden;
+  }
+  .scan::after {
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-accent), transparent);
+    animation: scan 3.5s linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes scan {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(400px); }
+  }
+
+  /* Sparkline SVG */
+  .sparkline { width: 100%; height: 32px; display: block; }
+  .sparkline path.line { fill: none; stroke-width: 1.5; }
+  .sparkline path.area  { opacity: 0.25; }
+  .sparkline.safe  path.line { stroke: var(--color-safe);   }
+  .sparkline.safe  path.area { fill: var(--color-safe);     }
+  .sparkline.warn  path.line { stroke: var(--color-warning);}
+  .sparkline.warn  path.area { fill: var(--color-warning);  }
+  .sparkline.flat  path.line { stroke: var(--color-text-secondary); }
+  .sparkline.flat  path.area { fill: var(--color-text-secondary); }
+  .sparkline .dot { fill: currentColor; }
+
+  /* Circular gauge */
+  .gauge-ring { position: relative; width: 180px; height: 180px; }
+  .gauge-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .gauge-ring .track { stroke: var(--color-border); fill: none; stroke-width: 10; }
+  .gauge-ring .fill-arc {
+    fill: none; stroke-width: 10; stroke-linecap: round;
+    transition: stroke-dashoffset 1.1s cubic-bezier(0.22, 1, 0.36, 1), stroke .3s ease;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+  .gauge-ring .fill-arc.safe { stroke: var(--color-safe); color: var(--color-safe); }
+  .gauge-ring .fill-arc.warn { stroke: var(--color-warning); color: var(--color-warning); }
+  .gauge-ring .fill-arc.danger { stroke: var(--color-danger); color: var(--color-danger); }
+  .gauge-ring .center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .gauge-ring .center .big {
+    font-size: 2rem; font-weight: 600; letter-spacing: -0.025em; line-height: 1;
+  }
+  .gauge-ring .center .cap {
+    margin-top: 6px;
+    font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  /* Terminal output — monospace blocks with blinking caret */
+  .terminal {
+    background: #0a080f;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.65;
+    color: var(--color-text-primary);
+    overflow-x: auto;
+    position: relative;
+  }
+  .terminal::before {
+    content: '';
+    position: absolute; top: 10px; left: 14px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--color-danger);
+    box-shadow:
+      14px 0 0 var(--color-warning),
+      28px 0 0 var(--color-safe);
+  }
+  .terminal .block {
+    padding-top: 10px;
+    margin-top: 8px;
+  }
+  .terminal .prompt { color: var(--color-accent); }
+  .terminal .ok    { color: var(--color-safe); }
+  .terminal .warn  { color: var(--color-warning); }
+  .terminal .fail  { color: var(--color-danger); }
+  .terminal .dim   { color: var(--color-text-secondary); }
+  .terminal .typed {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid var(--color-accent);
+    animation: caret 1s steps(1) infinite;
+  }
+  @keyframes caret {
+    50% { border-right-color: transparent; }
+  }
+
+  /* Shimmer skeleton (loading state demo) */
+  .shimmer {
+    position: relative; overflow: hidden;
+    background: var(--color-surface-hover);
+    border-radius: 4px;
+  }
+  .shimmer::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(232, 227, 213, 0.1),
+      transparent
+    );
+    animation: shimmer 1.6s linear infinite;
+  }
+  @keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Reveal: used by the router to animate rows one by one */
+  .reveal-row { animation: rise .55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .reveal-row:nth-child(1) { animation-delay: 0.04s; }
+  .reveal-row:nth-child(2) { animation-delay: 0.08s; }
+  .reveal-row:nth-child(3) { animation-delay: 0.12s; }
+  .reveal-row:nth-child(4) { animation-delay: 0.16s; }
+  .reveal-row:nth-child(5) { animation-delay: 0.20s; }
+  .reveal-row:nth-child(6) { animation-delay: 0.24s; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+
   /* ───── Buttons ───── */
   .btn {
     display: inline-flex; align-items: center; justify-content: center;
@@ -213,8 +475,25 @@
     transition: background .2s, color .2s, border-color .2s, transform .15s;
   }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-primary { background: var(--color-accent); color: var(--color-accent-ink); }
-  .btn-primary:hover:not(:disabled) { background: var(--color-accent-hover); }
+  .btn-primary {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(232, 227, 213, 0.15);
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: translateX(-100%);
+    transition: transform .6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    box-shadow: 0 6px 24px rgba(232, 227, 213, 0.3);
+  }
+  .btn-primary:hover:not(:disabled)::before { transform: translateX(100%); }
   .btn-ghost {
     background: transparent;
     border: 1px solid var(--color-border);
@@ -246,11 +525,22 @@
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 13px 20px; font-size: 0.86rem; border-bottom: 1px solid var(--color-border); }
   th { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-secondary); background: rgba(255, 255, 255, 0.015); }
-  tbody tr { transition: background .15s; }
-  tbody tr:hover { background: var(--color-surface-hover); }
+  tbody tr {
+    transition: background .2s ease, box-shadow .25s ease;
+    position: relative;
+  }
+  tbody tr:hover {
+    background: var(--color-surface-hover);
+    box-shadow: inset 2px 0 0 var(--color-accent);
+  }
   tbody tr:last-child td { border-bottom: none; }
   td code, td .mono { font-size: 0.82rem; color: var(--color-text-secondary); }
   .num-cell { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Verdict-row color stripe on hover */
+  tbody tr:has(.badge.allowed):hover { box-shadow: inset 2px 0 0 var(--color-safe); }
+  tbody tr:has(.badge.approval):hover { box-shadow: inset 2px 0 0 var(--color-warning); }
+  tbody tr:has(.badge.denied):hover { box-shadow: inset 2px 0 0 var(--color-danger); }
 
   /* ───── Form ───── */
   .form-section {
@@ -382,9 +672,26 @@
 
   /* ───── Rule card (mandate detail) ───── */
   .rule {
-    padding: 18px 20px; background: var(--color-surface);
+    padding: 18px 20px;
+    background:
+      linear-gradient(135deg, var(--color-surface), rgba(22, 18, 31, 0.75));
     border: 1px solid var(--color-border); border-radius: 12px;
+    position: relative; overflow: hidden;
+    transition: border-color .25s, transform .3s cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .rule::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 40px; height: 1px;
+    background: var(--color-accent);
+    box-shadow: 0 0 8px var(--color-accent);
+    opacity: 0; transition: opacity .3s;
+  }
+  .rule:hover {
+    border-color: rgba(232, 227, 213, 0.3);
+    transform: translateY(-2px);
+  }
+  .rule:hover::before { opacity: 1; }
   .rule .rlbl { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 8px; display:flex; align-items: center; gap: 6px; }
   .rule .rval { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.015em; }
   .rule .rval .unit { font-size: 0.72rem; color: var(--color-text-secondary); margin-left: 6px; font-weight: 400; }
@@ -470,11 +777,28 @@
 
   /* ───── APY card ───── */
   .apy-card {
-    padding: 18px 20px; background: var(--color-surface);
+    padding: 18px 20px;
+    background:
+      linear-gradient(135deg, var(--color-surface), rgba(22, 18, 31, 0.7));
     border: 1px solid var(--color-border); border-radius: 12px;
-    cursor: pointer; transition: border-color .2s, transform .2s;
+    cursor: pointer;
+    transition: border-color .25s, transform .3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow .3s;
+    position: relative; overflow: hidden;
   }
-  .apy-card:hover { border-color: var(--color-accent); transform: translateY(-2px); }
+  .apy-card::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 100% 0%, rgba(232, 227, 213, 0.06), transparent 55%);
+    opacity: 0;
+    transition: opacity .3s ease;
+    pointer-events: none;
+  }
+  .apy-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  }
+  .apy-card:hover::after { opacity: 1; }
   .apy-card .pool { font-weight: 500; font-size: 0.9rem; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
   .apy-card .rate { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; }
   .apy-card .rate .unit { font-size: 0.72rem; color: var(--color-text-secondary); margin-left: 4px; font-weight: 400; }
@@ -485,18 +809,39 @@
     padding: 24px; border-radius: 14px; margin-top: 20px;
     display: flex; align-items: flex-start; gap: 20px;
     border: 1px solid;
+    position: relative; overflow: hidden;
   }
-  .verdict-panel.allowed { background: rgba(79, 209, 197, 0.06); border-color: rgba(79, 209, 197, 0.3); }
-  .verdict-panel.approval { background: rgba(232, 181, 76, 0.06); border-color: rgba(232, 181, 76, 0.3); }
-  .verdict-panel.denied { background: rgba(229, 72, 77, 0.06); border-color: rgba(229, 72, 77, 0.3); }
+  .verdict-panel::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: currentColor;
+    opacity: 0.6;
+    box-shadow: 0 0 10px currentColor;
+  }
+  .verdict-panel.allowed  { background: rgba(79, 209, 197, 0.06); border-color: rgba(79, 209, 197, 0.3); color: var(--color-safe); }
+  .verdict-panel.approval { background: rgba(232, 181, 76, 0.06); border-color: rgba(232, 181, 76, 0.3); color: var(--color-warning); }
+  .verdict-panel.denied   { background: rgba(229, 72, 77, 0.06); border-color: rgba(229, 72, 77, 0.3); color: var(--color-danger); }
+
   .verdict-panel .big-badge {
     width: 56px; height: 56px; border-radius: 50%;
     display: grid; place-items: center;
     font-size: 1.5rem; font-weight: 600; flex-shrink: 0;
+    position: relative;
   }
-  .verdict-panel.allowed .big-badge { background: rgba(79, 209, 197, 0.15); color: var(--color-safe); }
+  .verdict-panel .big-badge::after {
+    content: ''; position: absolute; inset: -4px;
+    border-radius: 50%; border: 1px solid currentColor; opacity: 0.4;
+    animation: badge-ring 2.4s ease-out infinite;
+  }
+  @keyframes badge-ring {
+    0%   { transform: scale(1);   opacity: 0.4; }
+    80%  { transform: scale(1.5); opacity: 0;   }
+    100% { transform: scale(1.5); opacity: 0;   }
+  }
+  .verdict-panel.allowed .big-badge  { background: rgba(79, 209, 197, 0.15); color: var(--color-safe); }
   .verdict-panel.approval .big-badge { background: rgba(232, 181, 76, 0.15); color: var(--color-warning); }
-  .verdict-panel.denied .big-badge { background: rgba(229, 72, 77, 0.15); color: var(--color-danger); }
+  .verdict-panel.denied .big-badge   { background: rgba(229, 72, 77, 0.15); color: var(--color-danger); }
   .verdict-panel h4 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
   .verdict-panel p { color: var(--color-text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 10px; }
   .verdict-panel .reasoning {
@@ -544,6 +889,11 @@
 <body>
 
 <!-- ─────────────────────── Sidebar ─────────────────────── -->
+<div class="route-curtain" id="route-curtain" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+
 <aside class="sidebar" id="sidebar">
   <a class="brand" data-view="dashboard">
     <span class="seal">M</span><span>MandateFi</span>
@@ -671,16 +1021,29 @@
               <div class="apy-card">
                 <div class="pool">Aave v3 <span style="color: var(--color-safe); font-size: 0.72rem;">↑</span></div>
                 <div class="rate">4.82<span class="unit">%</span></div>
+                <svg class="sparkline safe" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="area" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3 L120,32 L0,32 Z" />
+                  <path class="line" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3" />
+                  <circle class="dot" cx="120" cy="3" r="2.5" />
+                </svg>
                 <div class="trend">+0.14 (24h)</div>
               </div>
               <div class="apy-card">
                 <div class="pool">Compound v3 <span style="color: var(--color-danger); font-size: 0.72rem;">↓</span></div>
                 <div class="rate">3.95<span class="unit">%</span></div>
+                <svg class="sparkline warn" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="area" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24 L120,32 L0,32 Z" />
+                  <path class="line" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24" />
+                  <circle class="dot" cx="120" cy="24" r="2.5" />
+                </svg>
                 <div class="trend">−0.22 (24h)</div>
               </div>
               <div class="apy-card">
                 <div class="pool">Stable Reserve <span style="color: var(--color-text-secondary); font-size: 0.72rem;">—</span></div>
                 <div class="rate">2.10<span class="unit">%</span></div>
+                <svg class="sparkline flat" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="line" d="M0,16 L120,16" stroke-dasharray="2 3" />
+                </svg>
                 <div class="trend">Reserve floor</div>
               </div>
             </div>
@@ -982,18 +1345,35 @@
         </div>
       </div>
 
-      <div class="grid-3" style="margin-bottom: 20px;">
-        <div class="rule">
-          <div class="rlbl">Per-tx limit <span class="tip" data-tip="Reverts with ExceedsPerTxLimit(amount, 200e6) above this cap.">?</span></div>
-          <div class="rval">200<span class="unit">USDC</span></div>
-          <div class="rsub">Hard cap per proposal</div>
+      <!-- Daily usage ring + rule cards -->
+      <div style="display: grid; grid-template-columns: 240px 1fr; gap: 20px; margin-bottom: 20px; align-items: start;">
+        <div class="rule" style="display: flex; flex-direction: column; align-items: center; padding: 24px; gap: 14px;">
+          <div class="rlbl" style="margin-bottom: 0;">Daily usage</div>
+          <div class="gauge-ring">
+            <svg viewBox="0 0 160 160" aria-hidden="true">
+              <circle class="track" cx="80" cy="80" r="68"></circle>
+              <circle class="fill-arc warn" cx="80" cy="80" r="68"
+                stroke-dasharray="427.26" stroke-dashoffset="153.81"></circle>
+            </svg>
+            <div class="center">
+              <div class="big">64<span style="font-size: 0.9rem; color: var(--color-text-secondary); margin-left: 2px;">%</span></div>
+              <div class="cap">320 / 500 USDC</div>
+            </div>
+          </div>
+          <div class="rsub" style="text-align: center; margin-top: 0;">Resets at UTC midnight</div>
         </div>
-        <div class="rule">
-          <div class="rlbl">Daily limit <span class="tip" data-tip="Sum of all approvals today. Resets on-chain at UTC midnight.">?</span></div>
-          <div class="rval">500<span class="unit">USDC</span></div>
-          <div class="rsub">Used today: <strong style="color: var(--color-warning);">320 USDC</strong> (64%)</div>
-          <div class="progress warn" style="margin-top: 8px;"><div class="fill" style="width: 64%;"></div></div>
-        </div>
+
+        <div class="grid-3" style="margin-bottom: 0;">
+          <div class="rule">
+            <div class="rlbl">Per-tx limit <span class="tip" data-tip="Reverts with ExceedsPerTxLimit(amount, 200e6) above this cap.">?</span></div>
+            <div class="rval">200<span class="unit">USDC</span></div>
+            <div class="rsub">Hard cap per proposal</div>
+          </div>
+          <div class="rule">
+            <div class="rlbl">Daily limit <span class="tip" data-tip="Sum of all approvals today. Resets on-chain at UTC midnight.">?</span></div>
+            <div class="rval">500<span class="unit">USDC</span></div>
+            <div class="rsub">Across all proposals today</div>
+          </div>
         <div class="rule">
           <div class="rlbl">Approval threshold</div>
           <div class="rval">200<span class="unit">USDC</span></div>
@@ -1013,6 +1393,7 @@
           <div class="rlbl">Expiry</div>
           <div class="rval" style="font-size: 1rem;">2026-12-31</div>
           <div class="rsub">After which all proposals DENIED</div>
+        </div>
         </div>
       </div>
 
@@ -1143,43 +1524,34 @@
             <div class="big-badge">○</div>
             <div style="flex: 1;">
               <h4>REQUIRES_APPROVAL · Owner signature needed</h4>
-              <p>The proposal cleared destination and per-tx checks but exceeds your approval threshold.</p>
-              <div class="reasoning">
-                320 USDC &gt; 200 USDC (approvalThreshold) · routed to <code>REQUIRES_APPROVAL</code> at rule 7.
-              </div>
-              <div style="display: flex; gap: 10px; margin-top: 16px;">
+              <p>Proposal cleared destination and daily caps but exceeds the approval threshold. Awaiting your signature.</p>
+              <div style="display: flex; gap: 10px; margin-top: 12px;">
                 <button class="btn btn-primary btn-sm">Sign approval → Sepolia</button>
                 <button class="btn btn-ghost btn-sm">Reject</button>
                 <button class="btn btn-ghost btn-sm" style="margin-left: auto;" data-view="trace">View in trace →</button>
               </div>
-
-              <div class="checks">
-                <div class="check pass">
-                  <span class="mark">✓</span><span class="label">Mandate is Active</span><span class="value">status.Active</span>
-                </div>
-                <div class="check pass">
-                  <span class="mark">✓</span><span class="label">Not expired</span><span class="value">14 months remain</span>
-                </div>
-                <div class="check pass">
-                  <span class="mark">✓</span><span class="label">Caller is the mandate agent</span><span class="value">0x7b3e…</span>
-                </div>
-                <div class="check pass">
-                  <span class="mark">✓</span><span class="label">Destination is approved</span><span class="value">Compound v3</span>
-                </div>
-                <div class="check pass">
-                  <span class="mark">✓</span><span class="label">Amount within per-tx limit</span><span class="value">320 &lt; 200? ✕… wait</span>
-                </div>
-                <div class="check fail">
-                  <span class="mark">✕</span><span class="label">Amount within per-tx limit (actually fails)</span><span class="value">320 &gt; 200</span>
-                </div>
-                <div class="check skip">
-                  <span class="mark">—</span><span class="label">Within daily remainder</span><span class="value">skipped</span>
-                </div>
-                <div class="check trigger">
-                  <span class="mark">!</span><span class="label">Above approval threshold</span><span class="value">routed to REQUIRES_APPROVAL</span>
-                </div>
-              </div>
             </div>
+          </div>
+
+          <div class="terminal" style="margin-top: 16px;">
+            <div style="padding-left: 44px; font-size: 0.7rem; color: var(--color-text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">
+              policy-executor · dry-run · block 7,221,994
+            </div>
+            <div><span class="prompt">$</span> <span class="dim">PolicyExecutor.evaluate(</span>mandateId=<span class="ok">1</span>, amount=<span class="ok">320e6</span>, dest=<span class="ok">0xA17b…04e3</span><span class="dim">)</span></div>
+            <div class="block">
+              <div><span class="ok">✓</span> <span class="dim">[1/8]</span> mandate.status == Active                       <span class="dim">→ pass</span></div>
+              <div><span class="ok">✓</span> <span class="dim">[2/8]</span> block.timestamp &lt; expiry                       <span class="dim">→ 14mo left</span></div>
+              <div><span class="ok">✓</span> <span class="dim">[3/8]</span> msg.sender == mandate.agent                     <span class="dim">→ 0x7b3e…92fa</span></div>
+              <div><span class="ok">✓</span> <span class="dim">[4/8]</span> dest in approvedDestinations                    <span class="dim">→ Compound v3</span></div>
+              <div><span class="ok">✓</span> <span class="dim">[5/8]</span> amount &lt;= perTxLimit                            <span class="dim">→ 320 &lt; 500</span></div>
+              <div><span class="ok">✓</span> <span class="dim">[6/8]</span> usedToday + amount &lt;= dailyLimit                <span class="dim">→ 0 + 320 &lt;= 500</span></div>
+              <div><span class="warn">!</span> <span class="dim">[7/8]</span> amount &gt; approvalThreshold                      <span class="warn">→ 320 &gt; 200 · triggers REQUIRES_APPROVAL</span></div>
+              <div><span class="dim">—</span> <span class="dim">[8/8]</span> executionMode == AutoExecute                    <span class="dim">→ skipped (rule 7 halted)</span></div>
+            </div>
+            <div class="block" style="border-top: 1px dashed rgba(255,255,255,0.08);">
+              <span class="warn">verdict:</span> <span class="warn">REQUIRES_APPROVAL</span> <span class="dim">· gas ≈ 48,712</span>
+            </div>
+            <div><span class="prompt">$</span> <span class="typed">emit PolicyChecked(mandateId=1, proposalId=42, verdict=1)</span></div>
           </div>
         </div>
 
@@ -1220,7 +1592,11 @@
       <div class="page-head">
         <div>
           <h1>Policy trace</h1>
-          <div class="sub">Every proposal evaluated by PolicyExecutor, decoded into plain English.</div>
+          <div class="sub" style="display: flex; align-items: center; gap: 10px;">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span style="color: var(--color-safe); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem;">Live</span>
+            <span style="color: var(--color-text-secondary);">· streaming on-chain events from Sepolia</span>
+          </div>
         </div>
         <div class="page-head-actions">
           <button class="btn btn-ghost btn-sm">Export CSV</button>
@@ -1351,18 +1727,39 @@
       trace: 'Policy trace',
     };
 
+    const curtain = document.getElementById('route-curtain');
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let currentView = null;
+
     function go(name) {
       const target = titles[name] ? name : 'dashboard';
-      views.forEach(v => v.classList.toggle('active', v.dataset.view === target));
-      navItems.forEach(n => {
-        if (n.classList.contains('nav-item')) {
-          n.classList.toggle('active', n.dataset.view === target);
-        }
-      });
-      crumb.textContent = titles[target];
-      document.title = `MandateFi · ${titles[target]}`;
-      sidebar.classList.remove('open');
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      if (target === currentView) return;
+      const firstLoad = currentView === null;
+      currentView = target;
+
+      const render = () => {
+        views.forEach(v => v.classList.toggle('active', v.dataset.view === target));
+        navItems.forEach(n => {
+          if (n.classList.contains('nav-item')) {
+            n.classList.toggle('active', n.dataset.view === target);
+          }
+        });
+        crumb.textContent = titles[target];
+        document.title = `MandateFi · ${titles[target]}`;
+        sidebar.classList.remove('open');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      };
+
+      if (firstLoad || prefersReduced || !curtain) {
+        render();
+        return;
+      }
+      // Cinematic curtain wipe between views
+      curtain.classList.remove('on');
+      void curtain.offsetWidth;
+      curtain.classList.add('on');
+      setTimeout(render, 320);
+      setTimeout(() => curtain.classList.remove('on'), 1000);
     }
 
     function fromHash() {
