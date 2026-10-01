@@ -304,6 +304,87 @@
   .flow-grid {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
   }
+  .benefits-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  @media (max-width: 1200px) {
+    .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .benefits-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ─────────────── How it works — 3 steps ─────────────── */
+  .steps-section .steps {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    position: relative;
+    counter-reset: step;
+  }
+  .steps-section .steps::before {
+    content: '';
+    position: absolute;
+    top: 42px; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-border) 10%, var(--color-border) 90%, transparent);
+    pointer-events: none;
+  }
+  .step {
+    position: relative;
+    padding: 0 32px;
+    border-left: 1px solid var(--color-border);
+    display: flex; flex-direction: column; gap: 16px;
+    padding-bottom: 20px;
+  }
+  .step:first-child { border-left: none; padding-left: 0; }
+  .step .step-head {
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative;
+  }
+  .step .step-num {
+    width: 56px; height: 56px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono); font-size: 1rem;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    position: relative;
+    transition: border-color .3s ease, color .3s ease, transform .35s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 2;
+  }
+  .step:hover .step-num {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    transform: translateY(-3px);
+  }
+  .step .step-tag {
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+  .step h3 {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin-top: 8px;
+  }
+  .step p {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem; line-height: 1.6;
+  }
+  @media (max-width: 980px) {
+    .steps-section .steps { grid-template-columns: 1fr; }
+    .steps-section .steps::before { display: none; }
+    .step { border-left: none; border-top: 1px solid var(--color-border); padding: 32px 0 0; }
+    .step:first-child { border-top: none; padding-top: 0; }
+  }
   .flow-card {
     position: relative;
     padding: 32px 28px;
@@ -653,10 +734,39 @@
   .cta-section .btn-landing-dark:hover .label,
   .cta-section .btn-landing-dark:hover .arrow { background: #2a2730; }
   .cta-section .btn-landing-dark:hover .arrow { transform: translate(4px, -4px); }
+
+  .cta-section .btn-landing-light .label,
+  .cta-section .btn-landing-light .arrow {
+    background: transparent;
+    color: var(--landing-ink);
+    border: 1px solid var(--landing-ink);
+    transition: background .25s ease, color .25s ease, transform .4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .cta-section .btn-landing-light .arrow { border-left: none; }
+  .cta-section .btn-landing-light .label { border-right: none; }
+  .cta-section .btn-landing-light:hover .label,
+  .cta-section .btn-landing-light:hover .arrow {
+    background: var(--landing-ink); color: var(--landing-paper);
+  }
+  .cta-section .btn-landing-light:hover .arrow { transform: translate(4px, -4px); }
+
   .btn-landing .arrow {
     transition: background .25s ease, transform .4s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .btn-landing:hover .arrow { transform: translate(4px, -4px); }
+
+  .cta-sub {
+    margin-top: 24px;
+    max-width: 480px;
+    font-family: var(--font-mono); font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    line-height: 1.6;
+    color: rgba(17, 16, 21, 0.6);
+  }
+  .cta-buttons {
+    display: flex; flex-direction: column; gap: 16px;
+    align-items: flex-start;
+  }
 
   /* ─────────────── Footer ─────────────── */
   .footer {
@@ -839,10 +949,9 @@
   </div>
   <nav class="nav">
     <span class="nav-pill" id="nav-pill"></span>
-    <a href="#flow" data-section="flow">Protocol</a>
-    <a href="#surfaces" data-section="surfaces">Vault</a>
-    <a href="#principles" data-section="principles">Principles</a>
-    <a href="#faq" data-section="faq">FAQ</a>
+    <a href="#benefits" data-section="benefits">Benefits</a>
+    <a href="#how" data-section="how">How it works</a>
+    <a href="#launch" data-section="launch">Launch</a>
   </nav>
   <div class="header-right">
     <span class="network-pill"><span class="dot"></span>Sepolia</span>
@@ -856,14 +965,14 @@
     <div class="kicker">POLICY-CONTROLLED VAULT · ETHEREUM SEPOLIA</div>
     <h1>Your capital<br />should move<br /><em>within limits</em></h1>
     <p class="lede">
-      Deposit test USDC, mint a mandate, and let an AI agent rebalance within the per-tx, daily and destination rules you sign on-chain.
+      MandateFi is a policy-controlled DeFi vault. You sign a mandate on-chain, and an AI agent manages your test USDC strictly inside the per-tx, daily and destination rules you approved.
     </p>
     <div class="cta-row">
       <button class="btn-landing">
-        <span class="label">Enter the protocol</span>
+        <span class="label">Connect wallet</span>
         <span class="arrow">↗</span>
       </button>
-      <button class="btn-ghost">Read the docs →</button>
+      <button class="btn-ghost">Launch app →</button>
     </div>
   </div>
 
@@ -872,167 +981,102 @@
   </div>
 </section>
 
-<!-- How it works -->
-<section class="section-dark" id="flow" data-header-theme="dark">
+<!-- Benefits — Agent acts within your rules -->
+<section class="section-dark" id="benefits" data-header-theme="dark">
   <div class="section-head">
     <div>
-      <h2>Three contracts.<br /><em>One guarantee.</em></h2>
+      <h2>Agent acts<br /><em>within your rules</em></h2>
     </div>
     <div class="lede-wrap">
-      <p>MandateFi separates custody, policy and execution. Each contract owns one responsibility, so the agent can never move funds the mandate did not pre-authorize — not by accident, not by exploit.</p>
+      <p>You decide what the agent can do, how much it can move, and where. MandateFi encodes every limit into Solidity — the agent cannot step outside, not by accident, not by exploit.</p>
     </div>
   </div>
 
-  <div class="flow-grid">
+  <div class="benefits-grid">
     <article class="flow-card">
-      <div class="num">01 · CUSTODY</div>
-      <h3>MandateVault</h3>
-      <p>Holds your test USDC. Only you can deposit and withdraw to your own address. The vault refuses any external call that is not routed through the PolicyExecutor.</p>
-      <span class="foot">SafeERC20 · nonReentrant →</span>
+      <div class="num">01 · HARD CAPS</div>
+      <h3>Per-tx and daily limits</h3>
+      <p>Every proposal is bounded by `perTxLimit` and `dailyLimit`. The daily window resets on-chain in a fixed `1 days` block — not by the agent, not by a config file.</p>
+      <span class="foot">Enforced in Solidity →</span>
     </article>
     <article class="flow-card">
-      <div class="num">02 · RULES</div>
-      <h3>MandateRegistry</h3>
-      <p>Stores your mandate on-chain: approved destinations, per-tx limit, daily limit, APY trigger, expiry. Pause or revoke in one transaction — the mandate stops reasoning.</p>
-      <span class="foot">Active · Paused · Revoked →</span>
-    </article>
-    <article class="flow-card">
-      <div class="num">03 · GUARD</div>
-      <h3>PolicyExecutor</h3>
-      <p>Evaluates every proposal against the mandate in a fixed, auditable order. Returns Allowed, Requires-Approval, or Denied — and emits a trace event for the UI to render.</p>
-      <span class="foot">Allowed / Approval / Denied →</span>
-    </article>
-  </div>
-</section>
-
-<!-- Two surfaces -->
-<section class="markets" id="surfaces" data-header-theme="dark">
-  <div class="markets-grid">
-    <div class="markets-rail">
-      <h2>Two surfaces,<br />one mandate,<br /><em>no surprises</em></h2>
-      <p class="source">Live state read directly from the deployed contracts on Ethereum Sepolia. Addresses and ABIs ship in the repo.</p>
-    </div>
-
-    <div class="markets-cards">
-      <article class="mcard one">
-        <div class="idx">01</div>
-        <div class="status">Ethereum Sepolia</div>
-        <div class="ident">Mandate Vault</div>
-        <p class="desc">Your deposit lives here. Withdrawals are always available to you, even when the mandate is paused or revoked.</p>
-        <div class="big-stat">
-          <div class="lbl">Total deposits</div>
-          <div class="val"><span data-countup="12480">0</span><span class="unit">USDC</span></div>
-        </div>
-        <div class="foot">Custody separated from execution · circuit-broken by `nonReentrant`</div>
-      </article>
-
-      <article class="mcard two">
-        <div class="idx">02</div>
-        <div class="status">Ethereum Sepolia</div>
-        <div class="ident">Policy Executor</div>
-        <p class="desc">Checks every agent proposal against the mandate in a fixed order and halts at the first violated rule.</p>
-        <div class="big-stat">
-          <div class="lbl">Proposals evaluated · 24h</div>
-          <div class="val"><span data-countup="1207">0</span><span class="unit">traces</span></div>
-        </div>
-        <div class="foot">99.4% returned a verdict in under one block · zero mandate overruns</div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- Principles -->
-<section class="principles" id="principles" data-header-theme="light">
-  <div class="section-head">
-    <div>
-      <h2>What we<br /><em>will not break</em></h2>
-    </div>
-    <div class="lede-wrap">
-      <p>Six non-negotiables encoded directly into the contracts. Not conventions, not comments — Solidity rules the agent cannot bypass.</p>
-    </div>
-  </div>
-
-  <div class="principle-grid">
-    <div class="principle-cell">
-      <div class="pnum">01</div>
-      <h3>Agents never hold your keys</h3>
-      <p>An agent is just an on-chain address with the right to propose. All sensitive actions require your signature from your own Sepolia wallet.</p>
-    </div>
-    <div class="principle-cell">
-      <div class="pnum">02</div>
-      <h3>Withdrawals are always yours</h3>
-      <p>You can withdraw your deposit at any time, including while the mandate is paused, revoked, or expired. Custody is independent of policy.</p>
-    </div>
-    <div class="principle-cell">
-      <div class="pnum">03</div>
-      <h3>Per-tx and daily limits are hard caps</h3>
-      <p>Every proposal is bounded by `perTxLimit` and `dailyLimit`. The daily window resets on-chain — not off-chain, not by the agent.</p>
-    </div>
-    <div class="principle-cell">
-      <div class="pnum">04</div>
+      <div class="num">02 · ALLOWLIST</div>
       <h3>Approved destinations only</h3>
-      <p>Funds cannot flow to an address outside your pre-approved set. Adding a destination is an on-chain transaction signed by you.</p>
-    </div>
-    <div class="principle-cell">
-      <div class="pnum">05</div>
-      <h3>Pause stops thinking, not escape</h3>
-      <p>Pause and revoke are instant. New proposals are denied immediately, but you keep every right to move your capital.</p>
-    </div>
-    <div class="principle-cell">
-      <div class="pnum">06</div>
+      <p>Funds cannot leave the destinations you pre-approved. Adding a new pool is an on-chain transaction you sign — not a bot-editable setting.</p>
+      <span class="foot">Allowlist routing →</span>
+    </article>
+    <article class="flow-card">
+      <div class="num">03 · KILL SWITCH</div>
+      <h3>Pause and revoke in one tx</h3>
+      <p>Stop the agent instantly. New proposals return `DENIED` the moment the mandate flips to `Paused` or `Revoked`. Your withdrawals stay open.</p>
+      <span class="foot">Owner-only · Immediate →</span>
+    </article>
+    <article class="flow-card">
+      <div class="num">04 · AUDIT</div>
       <h3>Every verdict is traceable</h3>
-      <p>Each evaluation emits an event with the rule hit, the amount, the destination, and the timestamp. Nothing happens without a receipt.</p>
+      <p>Each evaluation emits a trace event — rule hit, amount, destination, timestamp. The UI renders it as a plain-English receipt. Nothing moves without one.</p>
+      <span class="foot">Allowed · Approval · Denied →</span>
+    </article>
+  </div>
+</section>
+
+<!-- How it works — 3 steps -->
+<section class="section-dark steps-section" id="how" data-header-theme="dark">
+  <div class="section-head">
+    <div>
+      <h2>How it works<br /><em>in three steps</em></h2>
+    </div>
+    <div class="lede-wrap">
+      <p>Deposit once, mint a mandate, let the agent propose. Every proposal is checked against the rules you signed before anything moves.</p>
     </div>
   </div>
+
+  <ol class="steps">
+    <li class="step">
+      <div class="step-head">
+        <div class="step-num">01</div>
+        <div class="step-tag">You sign · Sepolia</div>
+      </div>
+      <h3>Deposit USDC &amp; mint your mandate</h3>
+      <p>Fund the vault with test USDC. Sign a mandate on-chain with per-tx limit, daily limit, approved destinations, APY trigger and expiry.</p>
+    </li>
+
+    <li class="step">
+      <div class="step-head">
+        <div class="step-num">02</div>
+        <div class="step-tag">Agent proposes · No key access</div>
+      </div>
+      <h3>Agent proposes a rebalance</h3>
+      <p>The agent reads market data and submits a proposal to the PolicyExecutor — destination, amount, reason. It never touches your keys.</p>
+    </li>
+
+    <li class="step">
+      <div class="step-head">
+        <div class="step-num">03</div>
+        <div class="step-tag">On-chain · Deterministic</div>
+      </div>
+      <h3>PolicyExecutor runs your mandate</h3>
+      <p>Rules evaluate in a fixed order and stop at the first violation. Returns `ALLOWED`, `REQUIRES_APPROVAL`, or `DENIED` — and emits a trace event.</p>
+    </li>
+  </ol>
 </section>
 
-<!-- FAQ -->
-<section class="faq" id="faq" data-header-theme="dark">
-  <h2>Questions you<br /><em>should be asking</em></h2>
-
-  <div class="faq-list">
-    <details class="faq-item" open>
-      <summary><span>IS MANDATEFI AUDITED OR PRODUCTION-READY?</span><span class="plus">+</span></summary>
-      <div class="answer">
-        No. MandateFi is a testnet MVP running on Ethereum Sepolia. The yield oracle is owner-updated for demos and the agent runner is an off-chain script. Marked with <code>// RIALO:</code> in the source wherever a native primitive will replace a shortcut. Do not deposit real funds.
-      </div>
-    </details>
-    <details class="faq-item">
-      <summary><span>WHY ETHEREUM SEPOLIA AND NOT RIALO?</span><span class="plus">+</span></summary>
-      <div class="answer">
-        Rialo does not yet have a public deployment environment. Sepolia lets us demonstrate the policy enforcement model today with a Circle-issued test USDC, while reserving the native-webcall and native-timer paths for a Rialo port once it is available.
-      </div>
-    </details>
-    <details class="faq-item">
-      <summary><span>CAN THE AGENT CHANGE MY MANDATE?</span><span class="plus">+</span></summary>
-      <div class="answer">
-        No. Mandate mutation is restricted to the owner at the Solidity level with custom errors. The agent can only submit proposals; the registry is write-protected against the agent address by `onlyOwner` checks.
-      </div>
-    </details>
-    <details class="faq-item">
-      <summary><span>WHAT HAPPENS WHEN A PROPOSAL IS DENIED?</span><span class="plus">+</span></summary>
-      <div class="answer">
-        The call reverts with a typed custom error — e.g. <code>ExceedsPerTxLimit(amount, limit)</code> or <code>DestinationNotApproved(address)</code>. The frontend decodes the selector and renders a plain-English reason in the policy trace. No funds move.
-      </div>
-    </details>
-    <details class="faq-item">
-      <summary><span>HOW DO I GET TEST USDC?</span><span class="plus">+</span></summary>
-      <div class="answer">
-        Request from the Circle Sepolia faucet. The vault accepts Circle's issued USDC at <code>0x1c7D…7238</code>. Gas is paid in Sepolia ETH, which you can obtain from standard faucets.
-      </div>
-    </details>
-  </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section" data-header-theme="light">
+<!-- CTA — Connect Wallet / Launch App -->
+<section class="cta-section" id="launch" data-header-theme="light">
   <div>
     <div class="cta-copy">Ready when you are · Sepolia only</div>
     <h2>Write a mandate.<br /><em>Keep the keys.</em></h2>
+    <p class="cta-sub">
+      Connect your Sepolia wallet to deploy a mandate, or jump straight into the app to explore the policy trace with sample data.
+    </p>
   </div>
-  <div style="display:flex; justify-content:flex-start;">
+  <div class="cta-buttons">
     <button class="btn-landing btn-landing-dark">
-      <span class="label">Open the dashboard</span>
+      <span class="label">Connect wallet</span>
+      <span class="arrow">↗</span>
+    </button>
+    <button class="btn-landing btn-landing-light">
+      <span class="label">Launch app</span>
       <span class="arrow">↗</span>
     </button>
   </div>
@@ -1207,10 +1251,7 @@
     const groups = [
       { sel: '.section-head > div', stag: true },
       { sel: '.flow-card', stag: true },
-      { sel: '.markets-rail', stag: false },
-      { sel: '.mcard', stag: true },
-      { sel: '.principle-cell', stag: true },
-      { sel: 'details.faq-item', stag: true },
+      { sel: '.step', stag: true },
       { sel: '.cta-section > *', stag: true },
     ];
     groups.forEach(({ sel, stag }) => {
@@ -1287,7 +1328,7 @@
       requestAnimationFrame(tick);
     }
 
-    const targets = document.querySelectorAll('.flow-card .num, .mcard .idx, .principle-cell .pnum, .kicker, .footer-kicker > span');
+    const targets = document.querySelectorAll('.flow-card .num, .step .step-num, .step .step-tag, .kicker, .footer-kicker > span');
     const io = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting && e.intersectionRatio > 0.5) {
