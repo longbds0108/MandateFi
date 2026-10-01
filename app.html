@@ -1012,42 +1012,6 @@
             </div>
           </div>
 
-          <div class="glass">
-            <div class="panel-head">
-              <h3>APY feed <span style="color: var(--color-warning); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px;">// RIALO: mock</span></h3>
-              <span class="sub">Updated 14:12 UTC</span>
-            </div>
-            <div class="panel-body" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-              <div class="apy-card">
-                <div class="pool">Aave v3 <span style="color: var(--color-safe); font-size: 0.72rem;">↑</span></div>
-                <div class="rate">4.82<span class="unit">%</span></div>
-                <svg class="sparkline safe" viewBox="0 0 120 32" preserveAspectRatio="none">
-                  <path class="area" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3 L120,32 L0,32 Z" />
-                  <path class="line" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3" />
-                  <circle class="dot" cx="120" cy="3" r="2.5" />
-                </svg>
-                <div class="trend">+0.14 (24h)</div>
-              </div>
-              <div class="apy-card">
-                <div class="pool">Compound v3 <span style="color: var(--color-danger); font-size: 0.72rem;">↓</span></div>
-                <div class="rate">3.95<span class="unit">%</span></div>
-                <svg class="sparkline warn" viewBox="0 0 120 32" preserveAspectRatio="none">
-                  <path class="area" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24 L120,32 L0,32 Z" />
-                  <path class="line" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24" />
-                  <circle class="dot" cx="120" cy="24" r="2.5" />
-                </svg>
-                <div class="trend">−0.22 (24h)</div>
-              </div>
-              <div class="apy-card">
-                <div class="pool">Stable Reserve <span style="color: var(--color-text-secondary); font-size: 0.72rem;">—</span></div>
-                <div class="rate">2.10<span class="unit">%</span></div>
-                <svg class="sparkline flat" viewBox="0 0 120 32" preserveAspectRatio="none">
-                  <path class="line" d="M0,16 L120,16" stroke-dasharray="2 3" />
-                </svg>
-                <div class="trend">Reserve floor</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div class="glass">
@@ -1150,25 +1114,7 @@
               <div class="hint">Available: 2,340.00 USDC</div>
             </div>
 
-            <div style="padding: 14px 16px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 16px;">
-              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 8px;">
-                <span style="color: var(--color-text-secondary);">You deposit</span>
-                <span style="font-weight: 500;">500.00 USDC</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 8px;">
-                <span style="color: var(--color-text-secondary);">New vault balance</span>
-                <span style="font-weight: 500;">12,980.00 USDC</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
-                <span style="color: var(--color-text-secondary);">Estimated gas</span>
-                <span style="font-weight: 500;">~0.0012 ETH</span>
-              </div>
-            </div>
-
-            <button class="btn btn-primary btn-wide">Deposit 500 USDC → MandateVault</button>
-            <div class="hint" style="margin-top: 10px; text-align: center;">
-              Opens your wallet to sign the transaction on Sepolia.
-            </div>
+            <button class="btn btn-primary btn-wide" style="margin-top: 8px;">Deposit 500 USDC → MandateVault</button>
           </div>
         </div>
 
@@ -1212,44 +1158,38 @@
         <div>
           <div class="form-section">
             <h3>Basics</h3>
-            <p class="section-sub">Identify this mandate and the agent allowed to propose actions.</p>
             <div class="field">
               <label>Mandate name</label>
-              <input type="text" value="Stable Rebalancer v2" placeholder="e.g. Stable Rebalancer v2" />
-              <div class="hint">Local label only — not stored on-chain. Helps you recognize this mandate in the UI.</div>
+              <input type="text" value="Stable Rebalancer v2" />
             </div>
             <div class="field">
-              <label>Agent address <span class="tip" data-tip="The on-chain address allowed to submit proposals under this mandate. Never share your owner key with it.">?</span></label>
+              <label>Agent address <span class="tip" data-tip="The on-chain address allowed to submit proposals under this mandate.">?</span></label>
               <input type="text" value="0x7b3eA2bE1a9c4F7C8f3b11D04d4F7c48D92fAa" />
-              <div class="hint">An EOA or a bot contract. Only this address can call `propose()` with this mandate id.</div>
             </div>
           </div>
 
           <div class="form-section">
             <h3>Approved destinations</h3>
-            <p class="section-sub">The agent can only move funds into addresses in this list.</p>
-            <div class="chip-list" style="margin-bottom: 12px;">
-              <span class="chip">Aave v3 USDC Reserve <span class="x">×</span></span>
-              <span class="chip">Compound v3 USDC Market <span class="x">×</span></span>
-              <span class="chip">Stable Reserve (owner) <span class="x">×</span></span>
-              <button class="chip-add">+ Add destination</button>
+            <div class="chip-list">
+              <span class="chip">Aave v3 USDC <span class="x">×</span></span>
+              <span class="chip">Compound v3 USDC <span class="x">×</span></span>
+              <span class="chip">Stable Reserve <span class="x">×</span></span>
+              <button class="chip-add">+ Add</button>
             </div>
-            <div class="hint">Add a pool contract address or an ENS. Sepolia faucet pools are preloaded for convenience.</div>
           </div>
 
           <div class="form-section">
             <h3>Limits</h3>
-            <p class="section-sub">Hard caps enforced in Solidity. The daily window resets on-chain at midnight UTC.</p>
             <div class="field-row">
               <div class="field">
-                <label>Per-tx limit <span class="tip" data-tip="Maximum USDC movable in a single proposal. Enforced via custom error ExceedsPerTxLimit(amount, limit).">?</span></label>
+                <label>Per-tx limit</label>
                 <div class="input-group">
                   <input type="text" value="200" />
                   <span class="suffix">USDC</span>
                 </div>
               </div>
               <div class="field">
-                <label>Daily limit <span class="tip" data-tip="Maximum USDC movable across all proposals today. Rolls over on day boundary (block.timestamp / 1 days).">?</span></label>
+                <label>Daily limit</label>
                 <div class="input-group">
                   <input type="text" value="500" />
                   <span class="suffix">USDC</span>
@@ -1257,72 +1197,41 @@
               </div>
             </div>
             <div class="field">
-              <label>Approval threshold <span class="tip" data-tip="Proposals strictly above this amount require your signature even if below the per-tx limit.">?</span></label>
+              <label>Approval threshold <span class="tip" data-tip="Above this amount, proposal routes to REQUIRES_APPROVAL.">?</span></label>
               <div class="input-group">
                 <input type="text" value="200" />
                 <span class="suffix">USDC</span>
-              </div>
-              <div class="hint">If `amount &gt; threshold` the executor returns REQUIRES_APPROVAL instead of executing.</div>
-            </div>
-          </div>
-
-          <div class="form-section">
-            <h3>APY trigger &amp; reserve</h3>
-            <p class="section-sub">Auto-move funds to a safe destination when yield falls below a floor.</p>
-            <div class="field-row">
-              <div class="field">
-                <label>APY floor <span class="tip" data-tip="Expressed in basis points. 500 = 5.00% APY.">?</span></label>
-                <div class="input-group">
-                  <input type="text" value="500" />
-                  <span class="suffix">bps · 5.00%</span>
-                </div>
-              </div>
-              <div class="field">
-                <label>Stable reserve</label>
-                <select>
-                  <option>Stable Reserve (owner)</option>
-                  <option>USDC balance in vault</option>
-                </select>
               </div>
             </div>
           </div>
 
           <div class="form-section">
             <h3>Execution &amp; expiry</h3>
-            <p class="section-sub">Decide whether the agent auto-executes allowed proposals or always waits for you.</p>
             <div class="field">
               <label>Execution mode</label>
               <div class="toggle">
                 <button class="on">AutoExecute</button>
                 <button>RequireApproval</button>
               </div>
-              <div class="hint">In <code>RequireApproval</code> mode every proposal — even ALLOWED ones — waits for your signature.</div>
             </div>
             <div class="field">
               <label>Expiry</label>
               <input type="date" value="2026-12-31" />
-              <div class="hint">After this date, every proposal returns `DENIED` with `MandateExpired(uint256 at)`.</div>
             </div>
           </div>
         </div>
 
         <aside class="preview">
-          <div class="preview-label">Mandate preview</div>
-          <div class="preview-row"><span class="k">Name</span><span class="v">Stable Rebalancer v2</span></div>
+          <div class="preview-label">Preview</div>
           <div class="preview-row"><span class="k">Agent</span><span class="v" style="font-size: 0.76rem;">0x7b3e…92fa</span></div>
           <div class="preview-row"><span class="k">Destinations</span><span class="v">3 pools</span></div>
-          <div class="preview-row"><span class="k">Per-tx limit</span><span class="v">200 USDC</span></div>
-          <div class="preview-row"><span class="k">Daily limit</span><span class="v">500 USDC</span></div>
+          <div class="preview-row"><span class="k">Per-tx</span><span class="v">200 USDC</span></div>
+          <div class="preview-row"><span class="k">Daily</span><span class="v">500 USDC</span></div>
           <div class="preview-row"><span class="k">Approval ≥</span><span class="v">200 USDC</span></div>
-          <div class="preview-row"><span class="k">APY floor</span><span class="v">5.00% (500 bps)</span></div>
           <div class="preview-row"><span class="k">Mode</span><span class="v">AutoExecute</span></div>
           <div class="preview-row"><span class="k">Expiry</span><span class="v">2026-12-31</span></div>
 
-          <div style="margin-top: 20px; padding: 14px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.76rem; color: var(--color-text-secondary); line-height: 1.5;">
-            Signing calls <code>MandateRegistry.createMandate(params)</code> and emits <code>MandateCreated(id, owner, agent)</code>.
-          </div>
-          <button class="btn btn-primary btn-wide" style="margin-top: 16px;">Sign mandate → Sepolia</button>
-          <button class="btn btn-ghost btn-wide" style="margin-top: 8px;">Save as draft</button>
+          <button class="btn btn-primary btn-wide" style="margin-top: 20px;">Sign mandate → Sepolia</button>
         </aside>
       </div>
     </section>
@@ -1369,11 +1278,6 @@
             <div class="rval">200<span class="unit">USDC</span></div>
             <div class="rsub">Hard cap per proposal</div>
           </div>
-          <div class="rule">
-            <div class="rlbl">Daily limit <span class="tip" data-tip="Sum of all approvals today. Resets on-chain at UTC midnight.">?</span></div>
-            <div class="rval">500<span class="unit">USDC</span></div>
-            <div class="rsub">Across all proposals today</div>
-          </div>
         <div class="rule">
           <div class="rlbl">Approval threshold</div>
           <div class="rval">200<span class="unit">USDC</span></div>
@@ -1383,16 +1287,6 @@
           <div class="rlbl">APY trigger</div>
           <div class="rval">5.00<span class="unit">% (500 bps)</span></div>
           <div class="rsub">Below floor → auto move to Stable Reserve</div>
-        </div>
-        <div class="rule">
-          <div class="rlbl">Execution mode</div>
-          <div class="rval" style="font-size: 1rem;">AutoExecute</div>
-          <div class="rsub">ALLOWED verdicts execute immediately</div>
-        </div>
-        <div class="rule">
-          <div class="rlbl">Expiry</div>
-          <div class="rval" style="font-size: 1rem;">2026-12-31</div>
-          <div class="rsub">After which all proposals DENIED</div>
         </div>
         </div>
       </div>
@@ -1535,23 +1429,14 @@
 
           <div class="terminal" style="margin-top: 16px;">
             <div style="padding-left: 44px; font-size: 0.7rem; color: var(--color-text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">
-              policy-executor · dry-run · block 7,221,994
+              policy-executor · dry-run
             </div>
-            <div><span class="prompt">$</span> <span class="dim">PolicyExecutor.evaluate(</span>mandateId=<span class="ok">1</span>, amount=<span class="ok">320e6</span>, dest=<span class="ok">0xA17b…04e3</span><span class="dim">)</span></div>
-            <div class="block">
-              <div><span class="ok">✓</span> <span class="dim">[1/8]</span> mandate.status == Active                       <span class="dim">→ pass</span></div>
-              <div><span class="ok">✓</span> <span class="dim">[2/8]</span> block.timestamp &lt; expiry                       <span class="dim">→ 14mo left</span></div>
-              <div><span class="ok">✓</span> <span class="dim">[3/8]</span> msg.sender == mandate.agent                     <span class="dim">→ 0x7b3e…92fa</span></div>
-              <div><span class="ok">✓</span> <span class="dim">[4/8]</span> dest in approvedDestinations                    <span class="dim">→ Compound v3</span></div>
-              <div><span class="ok">✓</span> <span class="dim">[5/8]</span> amount &lt;= perTxLimit                            <span class="dim">→ 320 &lt; 500</span></div>
-              <div><span class="ok">✓</span> <span class="dim">[6/8]</span> usedToday + amount &lt;= dailyLimit                <span class="dim">→ 0 + 320 &lt;= 500</span></div>
-              <div><span class="warn">!</span> <span class="dim">[7/8]</span> amount &gt; approvalThreshold                      <span class="warn">→ 320 &gt; 200 · triggers REQUIRES_APPROVAL</span></div>
-              <div><span class="dim">—</span> <span class="dim">[8/8]</span> executionMode == AutoExecute                    <span class="dim">→ skipped (rule 7 halted)</span></div>
-            </div>
+            <div><span class="ok">✓</span> dest in approvedDestinations <span class="dim">→ Compound v3</span></div>
+            <div><span class="ok">✓</span> amount &lt;= perTxLimit <span class="dim">→ 320 &lt; 500</span></div>
+            <div><span class="warn">!</span> amount &gt; approvalThreshold <span class="warn">→ 320 &gt; 200</span></div>
             <div class="block" style="border-top: 1px dashed rgba(255,255,255,0.08);">
-              <span class="warn">verdict:</span> <span class="warn">REQUIRES_APPROVAL</span> <span class="dim">· gas ≈ 48,712</span>
+              <span class="warn">verdict:</span> <span class="warn">REQUIRES_APPROVAL</span>
             </div>
-            <div><span class="prompt">$</span> <span class="typed">emit PolicyChecked(mandateId=1, proposalId=42, verdict=1)</span></div>
           </div>
         </div>
 
@@ -1580,9 +1465,6 @@
               </tr>
             </tbody>
           </table>
-          <div style="padding: 14px 20px; border-top: 1px solid var(--color-border); font-size: 0.72rem; color: var(--color-text-secondary); line-height: 1.5;">
-            <strong style="color: var(--color-warning);">// RIALO:</strong> oracle values are owner-updated via <code>MockYieldOracle.setApy(pool, bps)</code> in this testnet build. On Rialo this will come from native webcalls.
-          </div>
         </div>
       </div>
     </section>
@@ -1626,85 +1508,65 @@
         <table>
           <thead>
             <tr>
-              <th>Timestamp</th>
-              <th>Mandate · Agent</th>
+              <th>Time</th>
+              <th>Mandate</th>
               <th class="num-cell">Amount</th>
               <th>Destination</th>
               <th>Verdict</th>
-              <th>Rule hit</th>
               <th>Tx</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><div>Oct 1 · 14:07:52</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,984</div></td>
-              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
-              <td class="num-cell"><strong>500.00</strong> USDC</td>
+              <td>14:07:52</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>500</strong> USDC</td>
               <td><code>Unknown pool</code></td>
               <td><span class="badge denied">✕ Denied</span></td>
-              <td style="font-size: 0.78rem;">Destination not approved <span class="tip" data-tip="DestinationNotApproved(address) · rule 4 of 8">?</span></td>
               <td><code>0x8f3a…b721 ↗</code></td>
             </tr>
             <tr>
-              <td><div>Oct 1 · 14:04:38</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,981</div></td>
-              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
-              <td class="num-cell"><strong>320.00</strong> USDC</td>
+              <td>14:04:38</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>320</strong> USDC</td>
               <td>Compound v3</td>
               <td><span class="badge approval">○ Approval</span></td>
-              <td style="font-size: 0.78rem;">Over approval threshold (200 USDC)</td>
               <td><code>0x4e1c…ff02 ↗</code></td>
             </tr>
             <tr>
-              <td><div>Oct 1 · 14:02:11</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,977</div></td>
-              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
-              <td class="num-cell"><strong>120.00</strong> USDC</td>
+              <td>14:02:11</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>120</strong> USDC</td>
               <td>Aave v3</td>
               <td><span class="badge allowed">● Allowed</span></td>
-              <td style="font-size: 0.78rem;">All checks passed</td>
               <td><code>0xa5c8…11ed ↗</code></td>
             </tr>
             <tr>
-              <td><div>Oct 1 · 13:48:50</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,946</div></td>
-              <td><div style="font-weight: 500;">M#3 Compound-only</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x1a2b…cc33</div></td>
-              <td class="num-cell"><strong>80.00</strong> USDC</td>
+              <td>13:48:50</td>
+              <td>M#3 Compound-only</td>
+              <td class="num-cell"><strong>80</strong> USDC</td>
               <td>Compound v3</td>
               <td><span class="badge allowed">● Allowed</span></td>
-              <td style="font-size: 0.78rem;">All checks passed</td>
               <td><code>0x6b4d…5fa9 ↗</code></td>
             </tr>
             <tr>
-              <td><div>Oct 1 · 13:30:04</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,912</div></td>
-              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
-              <td class="num-cell"><strong>200.00</strong> USDC</td>
+              <td>13:30:04</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>200</strong> USDC</td>
               <td>Stable Reserve</td>
               <td><span class="badge allowed">● Allowed</span></td>
-              <td style="font-size: 0.78rem;">APY trigger · Compound &lt; 5.00% floor</td>
               <td><code>0x2a92…c8d1 ↗</code></td>
             </tr>
             <tr>
-              <td><div>Oct 1 · 13:10:40</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,874</div></td>
-              <td><div style="font-weight: 500;">M#1 Stable Rebalancer</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x7b3e…92fa</div></td>
-              <td class="num-cell"><strong>1,200.00</strong> USDC</td>
+              <td>13:10:40</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>1,200</strong> USDC</td>
               <td>Aave v3</td>
               <td><span class="badge denied">✕ Denied</span></td>
-              <td style="font-size: 0.78rem;">Exceeds per-tx limit (200 USDC)</td>
               <td><code>0xd1b4…09c2 ↗</code></td>
-            </tr>
-            <tr>
-              <td><div>Oct 1 · 12:52:16</div><div style="font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 3px;">Block 7,221,837</div></td>
-              <td><div style="font-weight: 500;">M#3 Compound-only</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x1a2b…cc33</div></td>
-              <td class="num-cell"><strong>50.00</strong> USDC</td>
-              <td>Compound v3</td>
-              <td><span class="badge allowed">● Allowed</span></td>
-              <td style="font-size: 0.78rem;">All checks passed</td>
-              <td><code>0x7f22…bc1a ↗</code></td>
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div style="margin-top: 16px; padding: 14px 18px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.78rem; color: var(--color-text-secondary); line-height: 1.5;">
-        <strong style="color: var(--color-text-primary);">Reading a denial:</strong> each event carries the typed custom error — e.g. <code>ExceedsPerTxLimit(1200e6, 200e6)</code> — which the UI decodes into "Exceeds per-tx limit (200 USDC)". Full trace lives on Sepolia; <code>0x…↗</code> links open Etherscan.
       </div>
     </section>
 
