@@ -182,6 +182,7 @@
     box-shadow: 0 0 8px var(--color-safe);
   }
   .btn-connect {
+    display: inline-flex; align-items: center;
     padding: 9px 18px;
     background: var(--color-accent);
     color: var(--color-accent-ink);
@@ -189,6 +190,7 @@
     letter-spacing: 0.06em; text-transform: uppercase;
     font-weight: 600;
     border: none; cursor: pointer;
+    text-decoration: none;
     transition: background .2s ease;
   }
   .btn-connect:hover { background: var(--color-accent-hover); }
@@ -879,7 +881,7 @@
     <a href="#faq" data-section="faq">FAQ</a>
   </nav>
   <div class="header-right">
-    <button class="btn-connect">Connect</button>
+    <a class="btn-connect" href="app.html">Launch app</a>
   </div>
   <div class="header-progress" id="header-progress" aria-hidden="true"></div>
 </header>
