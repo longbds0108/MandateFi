@@ -816,10 +816,10 @@
   .footer-ascii {
     position: relative;
     height: 120px;
-    margin-top: 16px;
+    margin-bottom: 16px;
     overflow: hidden;
-    mask-image: linear-gradient(to bottom, transparent, #000 55%, #000 100%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 55%, #000 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
   }
   #footer-field {
     display: block; width: 100%; height: 100%;
@@ -1079,6 +1079,10 @@
 <!-- Footer -->
 <footer class="footer" data-header-theme="dark">
 
+  <div class="footer-ascii" aria-hidden="true">
+    <canvas id="footer-field"></canvas>
+  </div>
+
   <div class="footer-grid">
     <div>
       <div class="col-heading">About</div>
@@ -1114,10 +1118,6 @@
         <li><a href="#">Rialo thesis</a></li>
       </ul>
     </div>
-  </div>
-
-  <div class="footer-ascii" aria-hidden="true">
-    <canvas id="footer-field"></canvas>
   </div>
 
   <div class="footer-bottom">
@@ -1502,10 +1502,10 @@
           const sx = x * cell + cell / 2;
           const sy = y * cell + cell / 2;
 
-          // Horizon: thicker/brighter near bottom, fades at edges.
+          // Horizon: thicker/brighter near top (just under hairline), fades down into the grid.
           const nx = Math.abs((x / cols) - 0.5) * 2; // 0 center → 1 edges
           const ny = y / rows;                       // 0 top → 1 bottom
-          let a = (1 - nx * 0.55) * (0.25 + ny * 0.85);
+          let a = (1 - nx * 0.55) * (0.25 + (1 - ny) * 0.85);
           a *= 0.65 + 0.35 * Math.sin(t * 0.35 + x * 0.09 + y * 0.11);
 
           if (a < 0.05) continue;
