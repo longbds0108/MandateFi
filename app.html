@@ -1012,6 +1012,43 @@
             </div>
           </div>
 
+          <div class="glass">
+            <div class="panel-head">
+              <h3>APY · 24h</h3>
+              <span class="sub">Mock oracle · updated 14:12 UTC</span>
+            </div>
+            <div class="panel-body" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+              <div class="apy-card">
+                <div class="pool">Aave v3 <span style="color: var(--color-safe); font-size: 0.72rem;">↑</span></div>
+                <div class="rate">4.82<span class="unit">%</span></div>
+                <svg class="sparkline safe" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="area" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3 L120,32 L0,32 Z" />
+                  <path class="line" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3" />
+                  <circle class="dot" cx="120" cy="3" r="2.5" />
+                </svg>
+                <div class="trend">+0.14</div>
+              </div>
+              <div class="apy-card">
+                <div class="pool">Compound v3 <span style="color: var(--color-danger); font-size: 0.72rem;">↓</span></div>
+                <div class="rate">3.95<span class="unit">%</span></div>
+                <svg class="sparkline warn" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="area" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24 L120,32 L0,32 Z" />
+                  <path class="line" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24" />
+                  <circle class="dot" cx="120" cy="24" r="2.5" />
+                </svg>
+                <div class="trend">−0.22</div>
+              </div>
+              <div class="apy-card">
+                <div class="pool">Reserve <span style="color: var(--color-text-secondary); font-size: 0.72rem;">—</span></div>
+                <div class="rate">2.10<span class="unit">%</span></div>
+                <svg class="sparkline flat" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="line" d="M0,16 L120,16" stroke-dasharray="2 3" />
+                </svg>
+                <div class="trend">Floor</div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <div class="glass">
@@ -1019,6 +1056,31 @@
             <h3>Recent policy trace</h3>
             <a class="sub" data-view="trace" style="color: var(--color-accent);">All →</a>
           </div>
+          <div style="padding: 20px 20px 10px; display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: center;">
+            <svg viewBox="0 0 80 80" class="donut" style="width: 100px; height: 100px;">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-border)" stroke-width="10" />
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-safe)"    stroke-width="10" stroke-dasharray="134 201" stroke-dashoffset="0"   transform="rotate(-90 40 40)" style="filter: drop-shadow(0 0 4px var(--color-safe));" />
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-warning)" stroke-width="10" stroke-dasharray="43 201"  stroke-dashoffset="-134" transform="rotate(-90 40 40)" style="filter: drop-shadow(0 0 4px var(--color-warning));" />
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-danger)"  stroke-width="10" stroke-dasharray="24 201"  stroke-dashoffset="-177" transform="rotate(-90 40 40)" style="filter: drop-shadow(0 0 4px var(--color-danger));" />
+              <text x="40" y="38" text-anchor="middle" fill="var(--color-text-primary)" font-size="14" font-weight="600" font-family="var(--font-body)">42</text>
+              <text x="40" y="52" text-anchor="middle" fill="var(--color-text-secondary)" font-size="7" letter-spacing="1" font-family="var(--font-body)">24h</text>
+            </svg>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-safe); box-shadow: 0 0 6px var(--color-safe);"></span>Allowed</span>
+                <span style="font-weight: 600; font-size: 0.86rem;">28</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-warning); box-shadow: 0 0 6px var(--color-warning);"></span>Approval</span>
+                <span style="font-weight: 600; font-size: 0.86rem;">9</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 6px var(--color-danger);"></span>Denied</span>
+                <span style="font-weight: 600; font-size: 0.86rem;">5</span>
+              </div>
+            </div>
+          </div>
+          <div style="height: 1px; background: var(--color-border); margin: 10px 20px;"></div>
           <div class="trace-item">
             <div>
               <div class="meta">14:07:52 · M#1 · AGENT 0x7b3e…</div>
@@ -1064,6 +1126,42 @@
         <div>
           <h1>Vault</h1>
           <div class="sub">Deposit and withdraw test USDC on Sepolia</div>
+        </div>
+      </div>
+
+      <div class="glass" style="margin-bottom: 20px;">
+        <div class="panel-head">
+          <h3>Vault balance · 30 days</h3>
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <span style="font-size: 1.1rem; font-weight: 600;">12,480<span style="font-size: 0.72rem; color: var(--color-text-secondary); margin-left: 4px;">USDC</span></span>
+            <span class="badge allowed" style="font-size: 0.62rem;">+2,480 (24.8%)</span>
+          </div>
+        </div>
+        <div style="padding: 10px 18px 18px;">
+          <svg viewBox="0 0 800 160" preserveAspectRatio="none" style="width: 100%; height: 140px; display: block;">
+            <defs>
+              <linearGradient id="vaultFill" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%"   stop-color="#e8e3d5" stop-opacity="0.35" />
+                <stop offset="100%" stop-color="#e8e3d5" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <!-- grid lines -->
+            <line x1="0" x2="800" y1="40"  y2="40"  stroke="#2A2438" stroke-dasharray="2 4" />
+            <line x1="0" x2="800" y1="80"  y2="80"  stroke="#2A2438" stroke-dasharray="2 4" />
+            <line x1="0" x2="800" y1="120" y2="120" stroke="#2A2438" stroke-dasharray="2 4" />
+            <!-- area -->
+            <path d="M0,140 L0,130 L30,128 L60,124 L90,118 L120,112 L150,108 L180,100 L210,95 L240,98 L270,90 L300,86 L330,74 L360,72 L390,66 L420,58 L450,56 L480,52 L510,48 L540,38 L570,40 L600,34 L630,28 L660,26 L690,20 L720,18 L750,14 L780,10 L800,8 L800,160 L0,160 Z"
+                  fill="url(#vaultFill)" />
+            <!-- line -->
+            <path d="M0,130 L30,128 L60,124 L90,118 L120,112 L150,108 L180,100 L210,95 L240,98 L270,90 L300,86 L330,74 L360,72 L390,66 L420,58 L450,56 L480,52 L510,48 L540,38 L570,40 L600,34 L630,28 L660,26 L690,20 L720,18 L750,14 L780,10 L800,8"
+                  stroke="#e8e3d5" stroke-width="1.75" fill="none" style="filter: drop-shadow(0 0 4px rgba(232,227,213,0.35));" />
+            <!-- current dot -->
+            <circle cx="800" cy="8" r="3.5" fill="#e8e3d5" />
+            <circle cx="800" cy="8" r="7" fill="none" stroke="#e8e3d5" stroke-opacity="0.3" />
+          </svg>
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--color-text-secondary); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 6px;">
+            <span>Sep 1</span><span>Sep 15</span><span>Oct 1 · today</span>
+          </div>
         </div>
       </div>
 
@@ -1442,29 +1540,50 @@
 
         <div class="glass">
           <div class="panel-head">
-            <h3>APY feed <span style="color: var(--color-warning); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px;">// RIALO: mock</span></h3>
-            <span class="sub">Updated 14:12 UTC</span>
+            <h3>APY · 24h</h3>
+            <span class="sub">3 pools · mock oracle</span>
           </div>
-          <table>
-            <thead><tr><th>Pool</th><th class="num-cell">APY</th><th class="num-cell">24h</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><div style="font-weight: 500;">Aave v3 USDC</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0x5425…7D1A</div></td>
-                <td class="num-cell" style="font-weight: 600; color: var(--color-safe);">4.82%</td>
-                <td class="num-cell" style="color: var(--color-safe);">+0.14</td>
-              </tr>
-              <tr>
-                <td><div style="font-weight: 500;">Compound v3 USDC</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0xA17b…04e3</div></td>
-                <td class="num-cell" style="font-weight: 600;">3.95%</td>
-                <td class="num-cell" style="color: var(--color-danger);">−0.22</td>
-              </tr>
-              <tr>
-                <td><div style="font-weight: 500;">Stable Reserve</div><div style="font-size: 0.72rem; color: var(--color-text-secondary); margin-top: 3px;">0xa94c…37f1</div></td>
-                <td class="num-cell" style="font-weight: 600;">2.10%</td>
-                <td class="num-cell" style="color: var(--color-text-secondary);">—</td>
-              </tr>
-            </tbody>
-          </table>
+          <div style="padding: 14px 18px 0;">
+            <svg viewBox="0 0 400 180" preserveAspectRatio="none" style="width: 100%; height: 180px; display: block;">
+              <!-- gridlines -->
+              <line x1="0" x2="400" y1="30"  y2="30"  stroke="#2A2438" stroke-dasharray="2 4" />
+              <line x1="0" x2="400" y1="80"  y2="80"  stroke="#2A2438" stroke-dasharray="2 4" />
+              <line x1="0" x2="400" y1="130" y2="130" stroke="#2A2438" stroke-dasharray="2 4" />
+              <!-- y labels -->
+              <text x="4" y="26"  fill="#A79DB5" font-size="9" font-family="var(--font-body)">6%</text>
+              <text x="4" y="76"  fill="#A79DB5" font-size="9" font-family="var(--font-body)">4%</text>
+              <text x="4" y="126" fill="#A79DB5" font-size="9" font-family="var(--font-body)">2%</text>
+
+              <!-- Aave uptrend (safe) -->
+              <path d="M0,80 L30,75 L60,78 L90,70 L120,65 L150,60 L180,62 L210,55 L240,48 L270,50 L300,42 L330,38 L360,35 L400,32"
+                    fill="none" stroke="#4FD1C5" stroke-width="1.75" style="filter: drop-shadow(0 0 3px #4FD1C5);" />
+              <circle cx="400" cy="32" r="3" fill="#4FD1C5" />
+
+              <!-- Compound downtrend (warn) -->
+              <path d="M0,65 L30,68 L60,72 L90,70 L120,76 L150,80 L180,85 L210,82 L240,88 L270,92 L300,95 L330,98 L360,100 L400,105"
+                    fill="none" stroke="#E8B54C" stroke-width="1.75" style="filter: drop-shadow(0 0 3px #E8B54C);" />
+              <circle cx="400" cy="105" r="3" fill="#E8B54C" />
+
+              <!-- Stable Reserve flat (dim) -->
+              <path d="M0,145 L400,145"
+                    fill="none" stroke="#A79DB5" stroke-width="1.25" stroke-dasharray="3 4" />
+              <circle cx="400" cy="145" r="3" fill="#A79DB5" />
+            </svg>
+          </div>
+          <div style="padding: 10px 18px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 0.76rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); margin-bottom: 2px;"><span style="width: 10px; height: 2px; background: var(--color-safe); display: inline-block;"></span>Aave v3</div>
+              <div style="font-weight: 600; color: var(--color-safe);">4.82%</div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); margin-bottom: 2px;"><span style="width: 10px; height: 2px; background: var(--color-warning); display: inline-block;"></span>Compound v3</div>
+              <div style="font-weight: 600;">3.95%</div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); margin-bottom: 2px;"><span style="width: 10px; height: 2px; background: var(--color-text-secondary); display: inline-block;"></span>Reserve</div>
+              <div style="font-weight: 600; color: var(--color-text-secondary);">2.10%</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1483,6 +1602,50 @@
         <div class="page-head-actions">
           <button class="btn btn-ghost btn-sm">Export CSV</button>
           <button class="btn btn-ghost btn-sm">Refresh ↻</button>
+        </div>
+      </div>
+
+      <!-- 24h verdict timeline -->
+      <div class="glass" style="margin-bottom: 16px;">
+        <div class="panel-head">
+          <h3>Verdict timeline · 24h</h3>
+          <span class="sub">42 events · hover for detail</span>
+        </div>
+        <div style="padding: 20px 20px 14px;">
+          <svg viewBox="0 0 800 60" preserveAspectRatio="none" style="width: 100%; height: 60px; display: block;">
+            <!-- baseline -->
+            <line x1="0" x2="800" y1="30" y2="30" stroke="#2A2438" />
+            <!-- hour ticks -->
+            <g fill="#2A2438">
+              <rect x="0" y="26" width="1" height="8" /><rect x="100" y="26" width="1" height="8" /><rect x="200" y="26" width="1" height="8" />
+              <rect x="300" y="26" width="1" height="8" /><rect x="400" y="26" width="1" height="8" /><rect x="500" y="26" width="1" height="8" />
+              <rect x="600" y="26" width="1" height="8" /><rect x="700" y="26" width="1" height="8" /><rect x="800" y="26" width="1" height="8" />
+            </g>
+            <!-- allowed events (teal above) -->
+            <g fill="#4FD1C5" style="filter: drop-shadow(0 0 3px #4FD1C5);">
+              <circle cx="20"  cy="20" r="4" /><circle cx="55"  cy="22" r="4" /><circle cx="85"  cy="18" r="4" />
+              <circle cx="140" cy="22" r="4" /><circle cx="190" cy="20" r="4" /><circle cx="230" cy="18" r="4" />
+              <circle cx="285" cy="20" r="4" /><circle cx="320" cy="22" r="4" /><circle cx="360" cy="18" r="4" />
+              <circle cx="420" cy="22" r="4" /><circle cx="470" cy="20" r="4" /><circle cx="510" cy="18" r="4" />
+              <circle cx="555" cy="20" r="4" /><circle cx="600" cy="22" r="4" /><circle cx="640" cy="18" r="4" />
+              <circle cx="680" cy="20" r="4" /><circle cx="720" cy="22" r="4" /><circle cx="755" cy="18" r="4" />
+              <circle cx="770" cy="22" r="4" /><circle cx="785" cy="20" r="4" />
+            </g>
+            <!-- approval events (warn below) -->
+            <g fill="#E8B54C" style="filter: drop-shadow(0 0 3px #E8B54C);">
+              <circle cx="75"  cy="42" r="4" /><circle cx="165" cy="42" r="4" /><circle cx="245" cy="42" r="4" />
+              <circle cx="340" cy="42" r="4" /><circle cx="440" cy="42" r="4" /><circle cx="520" cy="42" r="4" />
+              <circle cx="625" cy="42" r="4" /><circle cx="710" cy="42" r="4" /><circle cx="765" cy="42" r="4" />
+            </g>
+            <!-- denied events (danger at edge) -->
+            <g fill="#E5484D" style="filter: drop-shadow(0 0 4px #E5484D);">
+              <circle cx="110" cy="46" r="5" /><circle cx="265" cy="46" r="5" /><circle cx="395" cy="46" r="5" />
+              <circle cx="590" cy="46" r="5" /><circle cx="745" cy="46" r="5" />
+            </g>
+          </svg>
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--color-text-secondary); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px;">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>now</span>
+          </div>
         </div>
       </div>
 
