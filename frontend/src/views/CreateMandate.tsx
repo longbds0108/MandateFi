@@ -58,6 +58,17 @@ export function CreateMandate() {
     apyBpsAmount <= 10_000n &&
     expiryTs > nowTs;
   const canCreate = Boolean(address) && paramsValid;
+  const agentReady = isNonZeroAddress(agent);
+  const destinationsReady = destinations.length > 0 && destinations.length <= MAX_DESTINATIONS;
+  const limitsReady = limitsValid && apyBpsAmount !== undefined && apyBpsAmount <= 10_000n;
+  const safetyReady = isNonZeroAddress(reserveDest) && expiryTs > nowTs;
+  const validationIssues = [
+    !address && "Connect the wallet that will own this mandate.",
+    !agentReady && "Enter the agent wallet address.",
+    !destinationsReady && "Add at least one verified destination address.",
+    !limitsReady && "Check the limits, approval threshold, and APY floor.",
+    !safetyReady && "Set a valid reserve address and future expiry date.",
+  ].filter(Boolean) as string[];
 
   const tx = useWriteContract();
   const receipt = useWaitForTransactionReceipt({hash: tx.data});
@@ -126,49 +137,44 @@ export function CreateMandate() {
         <div>
           <h1>Create mandate</h1>
           <div className="sub">
-            Define the rules an agent must stay within. Signed on-chain by your Sepolia wallet.
+            Create a policy in three steps. Nothing is stored until you confirm the Sepolia transaction.
           </div>
         </div>
-        <div className="page-head-actions">
-          <button
-            className="btn btn-primary btn-sm"
-            disabled={!canCreate || tx.isPending || receipt.isLoading}
-            onClick={submit}
-          >
-            {tx.isPending || receipt.isLoading ? "Signing…" : "Sign mandate → Sepolia"}
-          </button>
-        </div>
+      </div>
+
+      <div className="mandate-steps" aria-label="Mandate creation steps">
+        <CreationStep number="01" label="Set participants" ready={agentReady && destinationsReady} />
+        <CreationStep number="02" label="Define limits" ready={limitsReady} />
+        <CreationStep number="03" label="Review & sign" ready={Boolean(address) && safetyReady} />
       </div>
 
       <div className="grid-form">
         <div>
           <div className="form-section">
-            <h3>Basics</h3>
+            <SectionTitle step="01" title="Set participants" description="Choose the wallet that can propose actions and the only destination addresses it may use." />
             <div className="field">
-              <label>Agent address</label>
+              <label>Agent wallet address</label>
               <input
                 value={agent}
                 onChange={(e) => setAgent(e.target.value)}
                 placeholder="0x…"
                 style={!agent || isNonZeroAddress(agent) ? {} : {borderColor: "var(--color-danger)"}}
               />
-              <div className="hint">The agent can submit proposals, but never withdraw funds directly.</div>
+              <div className="hint">This wallet can submit proposals only. Every transfer is still checked by the on-chain policy.</div>
             </div>
-          </div>
-
-          <div className="form-section">
-            <h3>Approved destinations</h3>
+            <div className="field" style={{marginTop: 20}}>
+              <label>Approved destinations <span className="field-count">{destinations.length}/{MAX_DESTINATIONS}</span></label>
             <div className="chip-list" style={{marginBottom: 12}}>
               {destinations.map((d, i) => {
                 return (
                   <span className="chip" key={d}>
                     {short(d)}
-                    <span className="x" onClick={() => removeDest(i)}>×</span>
+                    <button className="x" type="button" aria-label={`Remove ${short(d)}`} onClick={() => removeDest(i)}>×</button>
                   </span>
                 );
               })}
             </div>
-            <div className="hint" style={{marginTop: 8}}>Add only destination addresses you have verified yourself.</div>
+            <div className="hint">Add only addresses you have verified. This allowlist is immutable after signing.</div>
             <div style={{display: "flex", gap: 8}}>
               <input
                 value={newDest}
@@ -189,10 +195,11 @@ export function CreateMandate() {
                 Maximum {MAX_DESTINATIONS} destinations per mandate.
               </div>
             )}
+            </div>
           </div>
 
           <div className="form-section">
-            <h3>Limits</h3>
+            <SectionTitle step="02" title="Define limits" description="These limits are enforced by the PolicyExecutor for every agent proposal." />
             <div className="field-row">
               <div className="field">
                 <label>Per-tx limit</label>
@@ -222,13 +229,10 @@ export function CreateMandate() {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="form-section">
-            <h3>APY trigger &amp; reserve</h3>
+            <div className="form-divider" />
             <div className="field-row">
               <div className="field">
-                <label>APY floor</label>
+                <label>APY trigger floor</label>
                 <div className="input-group">
                   <input value={apyBps} onChange={(e) => setApyBps(e.target.value.replace(/[^0-9]/g, ""))} />
                   <span className="suffix">
@@ -243,12 +247,10 @@ export function CreateMandate() {
                   onChange={(e) => setReserveDest(e.target.value)}
                   placeholder="0x…"
                 />
+                {address && <button type="button" className="text-action" onClick={() => setReserveDest(address)}>Use connected wallet</button>}
               </div>
             </div>
-          </div>
-
-          <div className="form-section">
-            <h3>Execution &amp; expiry</h3>
+            <div className="form-divider" />
             <div className="field">
               <label>Execution mode</label>
               <div className="toggle">
@@ -262,6 +264,7 @@ export function CreateMandate() {
                   RequireApproval
                 </button>
               </div>
+              <div className="hint">AutoExecute settles an allowed proposal immediately. RequireApproval always waits for the owner.</div>
             </div>
             <div className="field">
               <label>Expiry</label>
@@ -271,10 +274,15 @@ export function CreateMandate() {
         </div>
 
         <aside className="preview">
-          <div className="preview-label">Preview</div>
-          <div className="preview-row"><span className="k">Next id</span><span className="v">#{String(nextId ?? "—")}</span></div>
+          <div className="preview-label">Transaction review</div>
+          <div className={`create-readiness ${canCreate ? "ready" : ""}`}>
+            <span className="readiness-icon">{canCreate ? "✓" : "!"}</span>
+            <div><strong>{canCreate ? "Ready to sign" : "Complete the checklist"}</strong><p>{canCreate ? "Your wallet will create this policy on Sepolia." : "The transaction button unlocks after every required field is valid."}</p></div>
+          </div>
+          {!canCreate && <ul className="validation-list">{validationIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul>}
+          <div className="preview-row"><span className="k">Next on-chain ID</span><span className="v">#{String(nextId ?? "—")}</span></div>
           <div className="preview-row"><span className="k">Agent</span><span className="v" style={{fontSize: "0.76rem"}}>{short(agent) || "—"}</span></div>
-          <div className="preview-row"><span className="k">Destinations</span><span className="v">{destinations.length} pools</span></div>
+          <div className="preview-row"><span className="k">Destinations</span><span className="v">{destinations.length} addresses</span></div>
           <div className="preview-row"><span className="k">Per-tx</span><span className="v">{perTx || 0} USDC</span></div>
           <div className="preview-row"><span className="k">Daily</span><span className="v">{daily || 0} USDC</span></div>
           <div className="preview-row"><span className="k">Approval ≥</span><span className="v">{threshold || 0} USDC</span></div>
@@ -292,7 +300,7 @@ export function CreateMandate() {
           </button>
           {!canCreate && (
             <div className="hint" style={{marginTop: 10, color: "var(--color-warning)"}}>
-              {address ? "Form has invalid fields. Fix them before signing." : "Connect the owner wallet before signing."}
+              {address ? "No transaction will be requested until the checklist is complete." : "Connect the owner wallet before signing."}
             </div>
           )}
           {err && (
@@ -335,6 +343,14 @@ function short(a?: string) {
   if (!a) return "";
   if (!isAddress(a)) return "";
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
+}
+
+function CreationStep({number, label, ready}: {number: string; label: string; ready: boolean}) {
+  return <div className={`mandate-step ${ready ? "ready" : ""}`}><span>{ready ? "✓" : number}</span><strong>{label}</strong></div>;
+}
+
+function SectionTitle({step, title, description}: {step: string; title: string; description: string}) {
+  return <div className="create-section-title"><span>{step}</span><div><h3>{title}</h3><p>{description}</p></div></div>;
 }
 
 function isNonZeroAddress(value: string): value is Address {
