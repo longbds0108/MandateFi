@@ -113,7 +113,58 @@ export function AppShellLayout() {
             <span className="current">{crumb}</span>
           </div>
           <div className="topbar-right">
-            <ConnectButton accountStatus="address" chainStatus="icon" showBalance={false} />
+            <ConnectButton.Custom>
+              {({
+                account,
+                chain,
+                mounted,
+                openAccountModal,
+                openChainModal,
+                openConnectModal,
+              }) => {
+                const connected = mounted && Boolean(account && chain);
+
+                if (!connected) {
+                  return (
+                    <>
+                      <button className="network-control" onClick={openChainModal} title="Select network">
+                        <span className="network-status" aria-hidden="true" />
+                        <span>Sepolia Testnet</span>
+                      </button>
+                      <button className="wallet-control wallet-connect" onClick={openConnectModal}>
+                        Connect wallet
+                        <ChevronDown />
+                      </button>
+                    </>
+                  );
+                }
+
+                if (chain?.unsupported) {
+                  return (
+                    <button className="network-control network-unsupported" onClick={openChainModal}>
+                      Wrong network
+                      <ChevronDown />
+                    </button>
+                  );
+                }
+
+                return (
+                  <>
+                    <button className="network-control" onClick={openChainModal} title="Change network">
+                      <span className="network-status" aria-hidden="true" />
+                      <span>{chain?.name ?? "Sepolia Testnet"}</span>
+                    </button>
+                    <button className="wallet-control" onClick={openAccountModal} title="Open wallet menu">
+                      <span className="wallet-avatar" aria-hidden="true">
+                        {account?.ensAvatar ? <img src={account.ensAvatar} alt="" /> : "M"}
+                      </span>
+                      <span>{account?.displayName}</span>
+                      <ChevronDown />
+                    </button>
+                  </>
+                );
+              }}
+            </ConnectButton.Custom>
           </div>
         </header>
 
@@ -122,5 +173,13 @@ export function AppShellLayout() {
         </main>
       </div>
     </>
+  );
+}
+
+function ChevronDown() {
+  return (
+    <svg className="wallet-chevron" viewBox="0 0 16 10" aria-hidden="true">
+      <path d="m1 1 7 7 7-7" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2.5" />
+    </svg>
   );
 }
