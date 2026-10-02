@@ -1,7 +1,16 @@
-import {NavLink, Outlet, useLocation} from "react-router-dom";
+import {NavLink, Outlet, useLocation, useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {ConnectButton} from "@rainbow-me/rainbowkit";
 import "../styles/app-shell.css";
+
+const VIEW_PATHS: Record<string, string> = {
+  dashboard: "/dashboard",
+  vault: "/vault",
+  create: "/create",
+  detail: "/detail",
+  agent: "/agent",
+  trace: "/trace",
+};
 
 const CRUMBS: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -33,6 +42,7 @@ const NAV = [
 
 export function AppShellLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const crumb = CRUMBS[location.pathname] ?? "Dashboard";
 
@@ -40,6 +50,23 @@ export function AppShellLayout() {
     document.title = `MandateFi · ${crumb}`;
     setOpen(false);
   }, [crumb]);
+
+  // Delegate clicks on inner [data-view="..."] elements (buttons/anchors inside
+  // the raw HTML views) to React Router so cross-view CTAs actually navigate.
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest<HTMLElement>("[data-view]");
+      if (!target) return;
+      const view = target.getAttribute("data-view");
+      if (!view) return;
+      const path = VIEW_PATHS[view];
+      if (!path) return;
+      e.preventDefault();
+      navigate(path);
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [navigate]);
 
   return (
     <>
