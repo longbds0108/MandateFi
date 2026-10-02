@@ -1,0 +1,21 @@
+{
+  "chainId": 11155111,
+  "chain": "sepolia",
+  "deployedAt": "2026-10-02",
+  "deployer": "0xF9642B695D4DDf58599c953a791F94c2e96b6a57",
+  "contracts": {
+    "MandateRegistry": "0x7De7Eea8ea210592F72eAFE6B637849227F8bA6b",
+    "MandateVault":    "0x31222a3b809c7c2eFCa9eE443A9F745b20DBA281",
+    "PolicyExecutor":  "0xA5a656F266c75Cb491e365BcB5F6B5b1409bD1C4",
+    "MockYieldOracle": "0x8b276D1c58A8Bd6245EDbF47c62b7a580465FF9d"
+  },
+  "external": {
+    "USDC": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+  },
+  "etherscan": {
+    "MandateRegistry": "https://sepolia.etherscan.io/address/0x7De7Eea8ea210592F72eAFE6B637849227F8bA6b",
+    "MandateVault":    "https://sepolia.etherscan.io/address/0x31222a3b809c7c2eFCa9eE443A9F745b20DBA281",
+    "PolicyExecutor":  "https://sepolia.etherscan.io/address/0xA5a656F266c75Cb491e365BcB5F6B5b1409bD1C4",
+    "MockYieldOracle": "https://sepolia.etherscan.io/address/0x8b276D1c58A8Bd6245EDbF47c62b7a580465FF9d"
+  }
+}
