@@ -26,6 +26,7 @@ export function CreateMandate() {
   const [apyBps, setApyBps] = useState("500");
   const [reserveDest, setReserveDest] = useState("");
   const [mode, setMode] = useState<"AutoExecute" | "RequireApproval">("AutoExecute");
+  const [createdId, setCreatedId] = useState<bigint>();
   const [expiry, setExpiry] = useState(() => {
     const d = new Date();
     d.setFullYear(d.getFullYear() + 1);
@@ -49,6 +50,7 @@ export function CreateMandate() {
     Number(perTx) > 0 &&
     Number(daily) >= Number(perTx) &&
     Number(threshold) >= 0 &&
+    Number(threshold) <= Number(perTx) &&
     Number(apyBps) >= 0 &&
     Number(apyBps) <= 10_000 &&
     expiryTs > nowTs;
@@ -77,6 +79,9 @@ export function CreateMandate() {
 
   function submit() {
     if (!isValid(registryAddr) || !paramsValid) return;
+    // nextId is the ID that this transaction will create. Preserve it before the
+    // registry increments so the post-confirmation route always opens the right mandate.
+    setCreatedId(nextId as bigint | undefined);
     tx.writeContract({
       address: registryAddr,
       abi: mandateRegistryAbi,
@@ -98,11 +103,10 @@ export function CreateMandate() {
   }
 
   useEffect(() => {
-    if (receipt.isSuccess) {
-      // Navigate to the detail page for the mandate we just created (nextId was pre-increment)
-      navigate(`/detail?id=${String(nextId ?? "")}`);
+    if (receipt.isSuccess && createdId) {
+      navigate(`/detail?id=${createdId.toString()}`);
     }
-  }, [receipt.isSuccess, navigate, nextId]);
+  }, [receipt.isSuccess, navigate, createdId]);
 
   const err = decodeTxError(tx.error);
 
@@ -200,6 +204,11 @@ export function CreateMandate() {
                 <span className="suffix">USDC</span>
               </div>
               <div className="hint">Above this amount, proposal routes to REQUIRES_APPROVAL.</div>
+              {Number(threshold) > Number(perTx) && (
+                <div className="hint" style={{color: "var(--color-warning)"}}>
+                  Approval threshold must not exceed the per-tx limit.
+                </div>
+              )}
             </div>
           </div>
 

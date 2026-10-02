@@ -14,28 +14,31 @@ type Mandate = {
 export function Dashboard() {
   const {address} = useAccount();
   const navigate = useNavigate();
-  const ready = !!address && isValid(CONTRACTS.vault) && isValid(CONTRACTS.registry);
+  const canReadProtocol = isValid(CONTRACTS.vault) && isValid(CONTRACTS.registry);
   const {data: nextId} = useReadContract({
     address: CONTRACTS.registry, abi: mandateRegistryAbi, functionName: "nextMandateId",
-    query: {enabled: ready, refetchInterval: 15_000},
+    query: {enabled: canReadProtocol, refetchInterval: 15_000},
   });
   const total = Math.min(Math.max(Number(nextId ?? 1n) - 1, 0), 64);
   const ids = useMemo(() => Array.from({length: total}, (_, index) => BigInt(index + 1)), [total]);
   const {data: balances} = useReadContracts({
-    contracts: ready ? [
-      {address: CONTRACTS.vault, abi: mandateVaultAbi, functionName: "balanceOf", args: [address]},
-      {address: CONTRACTS.usdc, abi: erc20Abi, functionName: "balanceOf", args: [address]},
-      {address: CONTRACTS.vault, abi: mandateVaultAbi, functionName: "totalDeposits"},
+    contracts: canReadProtocol ? [
+      ...(address ? [
+        {address: CONTRACTS.vault, abi: mandateVaultAbi, functionName: "balanceOf" as const, args: [address] as const},
+        {address: CONTRACTS.usdc, abi: erc20Abi, functionName: "balanceOf" as const, args: [address] as const},
+      ] : []),
+      {address: CONTRACTS.vault, abi: mandateVaultAbi, functionName: "totalDeposits" as const},
     ] : [],
-    query: {enabled: ready, refetchInterval: 10_000},
+    query: {enabled: canReadProtocol, refetchInterval: 10_000},
   });
   const {data: mandateResults, isLoading: mandatesLoading} = useReadContracts({
-    contracts: ready ? ids.map((id) => ({address: CONTRACTS.registry, abi: mandateRegistryAbi, functionName: "getMandate" as const, args: [id] as const})) : [],
-    query: {enabled: ready && ids.length > 0, refetchInterval: 15_000},
+    contracts: canReadProtocol ? ids.map((id) => ({address: CONTRACTS.registry, abi: mandateRegistryAbi, functionName: "getMandate" as const, args: [id] as const})) : [],
+    query: {enabled: canReadProtocol && ids.length > 0, refetchInterval: 15_000},
   });
-  const vaultBalance = (balances?.[0]?.result as bigint | undefined) ?? 0n;
-  const walletBalance = (balances?.[1]?.result as bigint | undefined) ?? 0n;
-  const totalDeposits = (balances?.[2]?.result as bigint | undefined) ?? 0n;
+  const vaultBalance = address ? (balances?.[0]?.result as bigint | undefined) ?? 0n : 0n;
+  const walletBalance = address ? (balances?.[1]?.result as bigint | undefined) ?? 0n : 0n;
+  const totalIndex = address ? 2 : 0;
+  const totalDeposits = (balances?.[totalIndex]?.result as bigint | undefined) ?? 0n;
   const mandates = useMemo(() => (mandateResults ?? []).flatMap((item) => item.status === "success" && item.result ? [item.result as Mandate] : []), [mandateResults]);
   const mine = useMemo(() => mandates.filter((m) => m.owner.toLowerCase() === address?.toLowerCase()), [mandates, address]);
   const now = Math.floor(Date.now() / 1000);
@@ -48,8 +51,8 @@ export function Dashboard() {
       <div className="page-head-actions"><button className="btn btn-ghost btn-sm" onClick={() => navigate("/vault")}>Manage vault</button><button className="btn btn-primary btn-sm" onClick={() => navigate("/create")}>Create mandate</button></div>
     </div>
     <div className="stat-grid">
-      <Stat label="Vault balance" value={amount(vaultBalance)} unit="USDC" detail={`Protocol total: ${amount(totalDeposits)} USDC`} />
-      <Stat label="Wallet balance" value={amount(walletBalance)} unit="USDC" detail={short(address)} />
+      <Stat label="Vault balance" value={address ? amount(vaultBalance) : "—"} unit={address ? "USDC" : undefined} detail={`Protocol total: ${amount(totalDeposits)} USDC`} />
+      <Stat label="Wallet balance" value={address ? amount(walletBalance) : "—"} unit={address ? "USDC" : undefined} detail={address ? short(address) : "Connect wallet to view"} />
       <Stat label="Active mandates" value={String(active.length)} detail={mine.length ? `${mine.length} mandate${mine.length === 1 ? "" : "s"} owned` : "No mandates created yet"} />
       <Stat label="Today’s available capacity" value={amount(dailyRemaining)} unit="USDC" detail="Across active mandates" />
     </div>

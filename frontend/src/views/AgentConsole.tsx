@@ -50,7 +50,8 @@ export function AgentConsole() {
   const destinations = (destList as Address[] | undefined) ?? [];
 
   useEffect(() => {
-    if (destinations.length > 0 && !destination) {
+    const isAllowed = destinations.some((item) => item.toLowerCase() === destination.toLowerCase());
+    if (destinations.length > 0 && !isAllowed) {
       setDestination(destinations[0]);
     }
   }, [destinations, destination]);

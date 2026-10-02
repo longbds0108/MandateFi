@@ -26,7 +26,7 @@ export function MandateDetail() {
     catch { return 0n; }
   }, [requestedId, nextId]);
   const enabled = isValid(CONTRACTS.registry) && id > 0n;
-  const {data, refetch, isLoading} = useReadContract({
+  const {data, refetch, isLoading, isError, error: mandateError} = useReadContract({
     address: CONTRACTS.registry, abi: mandateRegistryAbi, functionName: "getMandate", args: enabled ? [id] : undefined,
     query: {enabled, refetchInterval: 12_000},
   });
@@ -49,8 +49,14 @@ export function MandateDetail() {
   }
   function selectId(value: string) { setParams(value ? {id: value} : {}); }
 
-  if (!nextId || nextId === 1n) return <Empty navigate={navigate} />;
-  if (isLoading || !mandate) return <div className="panel-body" style={{color: "var(--color-text-secondary)"}}>Loading mandate from Sepolia…</div>;
+  if (nextId === undefined) return <div className="panel-body" style={{color: "var(--color-text-secondary)"}}>Loading registry from Sepolia…</div>;
+  if (nextId === 1n) {
+    return requestedId ? <Unavailable navigate={navigate} /> : <Empty navigate={navigate} />;
+  }
+  if (isLoading) return <div className="panel-body" style={{color: "var(--color-text-secondary)"}}>Loading mandate from Sepolia…</div>;
+  if (isError || !mandate) {
+    return <Unavailable navigate={navigate} notFound={mandateError?.message?.includes("MandateNotFound")} />;
+  }
 
   const used = percent(mandate.usedToday, mandate.dailyLimit);
   const status = statusName(mandate, now);
@@ -114,6 +120,7 @@ export function MandateDetail() {
 }
 
 function Empty({navigate}: {navigate: ReturnType<typeof useNavigate>}) { return <div className="form-section" style={{maxWidth: 620, margin: "50px auto"}}><h3>No mandates created</h3><p className="section-sub">Create a mandate to set the exact bounds an agent must follow.</p><button className="btn btn-primary" onClick={() => navigate("/create")}>Create mandate</button></div>; }
+function Unavailable({navigate, notFound = true}: {navigate: ReturnType<typeof useNavigate>; notFound?: boolean}) { return <div className="form-section" style={{maxWidth: 620, margin: "50px auto"}}><h3>Mandate unavailable</h3><p className="section-sub">{notFound ? "This mandate does not exist." : "The mandate could not be read from Sepolia. Check the ID and try again."}</p><button className="btn btn-primary" onClick={() => navigate("/dashboard")}>Back to dashboard</button></div>; }
 function Rule({label, value, unit, detail}: {label: string; value: string; unit?: string; detail: string}) { return <div className="rule"><div className="rlbl">{label}</div><div className="rval">{value}{unit && <span className="unit">{unit}</span>}</div><div className="rsub">{detail}</div></div>; }
 function amount(value: bigint) { return Number(formatUnits(value, USDC_DECIMALS)).toLocaleString("en-US", {maximumFractionDigits: 2}); }
 function percent(used: bigint, limit: bigint) { return limit === 0n ? 0 : Math.min(100, Math.round(Number((used * 10_000n) / limit) / 100)); }
