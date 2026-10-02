@@ -3,7 +3,7 @@ import "./styles/global.css";
 
 import {StrictMode} from "react";
 import {createRoot} from "react-dom/client";
-import {BrowserRouter} from "react-router-dom";
+import {HashRouter} from "react-router-dom";
 import {WagmiProvider} from "wagmi";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {
@@ -29,9 +29,9 @@ createRoot(document.getElementById("root")!).render(
           })}
           modalSize="compact"
         >
-          <BrowserRouter>
+          <HashRouter>
             <App />
-          </BrowserRouter>
+          </HashRouter>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

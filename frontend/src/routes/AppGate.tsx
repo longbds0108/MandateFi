@@ -23,10 +23,10 @@ export function AppGate() {
     }
   }, [isConnected, openConnectModal]);
 
-  // Once connected, if we're sitting at the bare /app, slide into the Dashboard.
+  // Once connected, if we're sitting at the gate root hash, slide into the Dashboard.
   useEffect(() => {
-    if (isConnected && location.pathname === "/app") {
-      navigate("/app/dashboard", {replace: true});
+    if (isConnected && location.pathname === "/") {
+      navigate("/dashboard", {replace: true});
     }
   }, [isConnected, location.pathname, navigate]);
 
@@ -55,7 +55,7 @@ export function AppGate() {
               chainStatus="icon"
               showBalance={false}
             />
-            <a className="back" href="/" onClick={(e) => { e.preventDefault(); navigate("/"); }}>
+            <a className="back" href="/">
               ← Back to landing
             </a>
           </div>
