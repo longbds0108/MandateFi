@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/appshelllayout.tsx","./src/config/contracts.ts","./src/config/wagmi.ts","./src/routes/appgate.tsx","./src/views/agentconsole.tsx","./src/views/createmandate.tsx","./src/views/dashboard.tsx","./src/views/mandatedetail.tsx","./src/views/policytrace.tsx","./src/views/vault.tsx"],"version":"5.9.3"}
