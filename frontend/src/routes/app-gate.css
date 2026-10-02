@@ -1,0 +1,75 @@
+.gate {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(232, 227, 213, 0.08), transparent 50%),
+    var(--color-bg);
+}
+.gate-card {
+  width: 100%; max-width: 540px;
+  padding: 48px 44px;
+  background: rgba(22, 18, 31, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  position: relative;
+}
+.gate-card .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 600; font-size: 1rem; letter-spacing: -0.015em;
+  margin-bottom: 44px;
+}
+.gate-card .seal {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--color-accent);
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 600; color: var(--color-accent-ink);
+}
+.gate-card .kicker {
+  font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--color-text-secondary); margin-bottom: 16px;
+}
+.gate-card h1 {
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  margin-bottom: 20px;
+}
+.gate-card h1 em {
+  font-style: italic;
+  color: var(--color-accent);
+}
+.gate-card p {
+  color: var(--color-text-secondary);
+  font-size: 0.92rem; line-height: 1.6;
+  margin-bottom: 28px;
+}
+.gate-card p code {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px; border-radius: 4px;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 0.84em;
+  color: var(--color-text-primary);
+}
+.gate-actions {
+  display: flex; align-items: center; gap: 20px;
+}
+.gate-actions .back {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  transition: color .2s;
+}
+.gate-actions .back:hover { color: var(--color-accent); }
+
+.btn-switch {
+  padding: 12px 24px;
+  background: var(--color-accent); color: var(--color-accent-ink);
+  border: none; border-radius: 8px;
+  font-size: 0.86rem; font-weight: 600;
+  transition: background .2s;
+}
+.btn-switch:hover:not(:disabled) { background: var(--color-accent-hover); }
+.btn-switch:disabled { opacity: 0.5; cursor: not-allowed; }
