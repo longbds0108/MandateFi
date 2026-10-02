@@ -22,7 +22,6 @@
     font-family: var(--font-body);
     font-feature-settings: 'tnum' 1, 'ss01' 1;
     -webkit-font-smoothing: antialiased;
-    display: flex;
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
@@ -117,7 +116,7 @@
   }
 
   /* ───── Main area ───── */
-  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .main { flex: 1; min-width: 0; min-height: 100vh; display: flex; flex-direction: column; }
   .topbar {
     height: 64px;
     border-bottom: 1px solid var(--color-border);
@@ -162,7 +161,7 @@
     background: linear-gradient(135deg, #e8e3d5, #3f91ff);
   }
 
-  .content { padding: 28px 32px; width: 100%; max-width: 1440px; }
+  .content { flex: 1; padding: 28px 32px; width: 100%; max-width: 1440px; }
   .page-head {
     display: flex; align-items: flex-end; justify-content: space-between;
     margin-bottom: 24px; gap: 20px;

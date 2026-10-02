@@ -100,9 +100,9 @@ export function CreateMandate() {
   useEffect(() => {
     if (receipt.isSuccess) {
       // Navigate to the detail page for the mandate we just created (nextId was pre-increment)
-      navigate("/detail");
+      navigate(`/detail?id=${String(nextId ?? "")}`);
     }
-  }, [receipt.isSuccess, navigate]);
+  }, [receipt.isSuccess, navigate, nextId]);
 
   const err = decodeTxError(tx.error);
 
