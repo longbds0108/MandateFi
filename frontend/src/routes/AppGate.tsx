@@ -1,6 +1,8 @@
+import {useEffect, useRef} from "react";
 import {Outlet} from "react-router-dom";
 import {useAccount, useChainId, useSwitchChain} from "wagmi";
 import {sepolia} from "wagmi/chains";
+import {useConnectModal} from "@rainbow-me/rainbowkit";
 import "./app-gate.css";
 
 /**
@@ -11,6 +13,21 @@ export function AppGate() {
   const {isConnected, address} = useAccount();
   const chainId = useChainId();
   const {switchChain, isPending: isSwitching} = useSwitchChain();
+  const {openConnectModal} = useConnectModal();
+  const didRequestConnect = useRef(false);
+
+  // A visitor can browse the app without a wallet, but the landing-page CTA
+  // intentionally carries ?connect=1 so it opens RainbowKit on arrival.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("connect") === "1";
+    if (requested && !isConnected && !didRequestConnect.current && openConnectModal) {
+      didRequestConnect.current = true;
+      openConnectModal();
+    }
+    if (isConnected && requested) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.hash}`);
+    }
+  }, [isConnected, openConnectModal]);
 
   if (isConnected && chainId !== sepolia.id) {
     return (
