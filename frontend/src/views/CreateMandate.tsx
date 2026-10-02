@@ -1,24 +1,21 @@
 import {useState, useMemo, useEffect} from "react";
 import {useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract} from "wagmi";
 import {useNavigate} from "react-router-dom";
-import {parseUnits, isAddress, type Address} from "viem";
+import {decodeEventLog, parseUnits, isAddress, type Address} from "viem";
 import {mandateRegistryAbi} from "../abi/MandateRegistry";
 import {CONTRACTS, USDC_DECIMALS, isValid} from "../config/contracts";
 import {decodeTxError} from "../lib/txErrors";
 
-const DEFAULT_DESTINATIONS: {label: string; address: Address}[] = [
-  {label: "Aave v3 Sepolia", address: "0x5425890298aed601595a70AB815c96711a31Bc65"},
-  {label: "Compound v3 Sepolia", address: "0xA17b7F7F5f3B99b5A1b5d3fB7a3D7c08cE8fc8b2"},
-];
+const MAX_DESTINATIONS = 16;
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export function CreateMandate() {
   const {address} = useAccount();
   const navigate = useNavigate();
   const registryAddr = CONTRACTS.registry;
 
-  const [name, setName] = useState("Stable Rebalancer v1");
   const [agent, setAgent] = useState("");
-  const [destinations, setDestinations] = useState<Address[]>(DEFAULT_DESTINATIONS.map((d) => d.address));
+  const [destinations, setDestinations] = useState<Address[]>([]);
   const [newDest, setNewDest] = useState("");
   const [perTx, setPerTx] = useState("200");
   const [daily, setDaily] = useState("500");
@@ -26,7 +23,6 @@ export function CreateMandate() {
   const [apyBps, setApyBps] = useState("500");
   const [reserveDest, setReserveDest] = useState("");
   const [mode, setMode] = useState<"AutoExecute" | "RequireApproval">("AutoExecute");
-  const [createdId, setCreatedId] = useState<bigint>();
   const [expiry, setExpiry] = useState(() => {
     const d = new Date();
     d.setFullYear(d.getFullYear() + 1);
@@ -39,21 +35,29 @@ export function CreateMandate() {
 
   const expiryTs = Math.floor(new Date(expiry).getTime() / 1000);
   const nowTs = Math.floor(Date.now() / 1000);
+  const perTxAmount = useMemo(() => parseUsdc(perTx), [perTx]);
+  const dailyAmount = useMemo(() => parseUsdc(daily), [daily]);
+  const thresholdAmount = useMemo(() => parseUsdc(threshold), [threshold]);
+  const apyBpsAmount = useMemo(() => parseWholeNumber(apyBps), [apyBps]);
+  const limitsValid =
+    perTxAmount !== undefined &&
+    dailyAmount !== undefined &&
+    thresholdAmount !== undefined &&
+    perTxAmount > 0n &&
+    dailyAmount >= perTxAmount &&
+    thresholdAmount <= perTxAmount;
 
   const paramsValid =
-    name.trim().length > 0 &&
-    isAddress(agent) &&
+    isNonZeroAddress(agent) &&
     destinations.length > 0 &&
-    destinations.every((d) => isAddress(d)) &&
-    reserveDest.length > 0 &&
-    isAddress(reserveDest) &&
-    Number(perTx) > 0 &&
-    Number(daily) >= Number(perTx) &&
-    Number(threshold) >= 0 &&
-    Number(threshold) <= Number(perTx) &&
-    Number(apyBps) >= 0 &&
-    Number(apyBps) <= 10_000 &&
+    destinations.length <= MAX_DESTINATIONS &&
+    destinations.every(isNonZeroAddress) &&
+    isNonZeroAddress(reserveDest) &&
+    limitsValid &&
+    apyBpsAmount !== undefined &&
+    apyBpsAmount <= 10_000n &&
     expiryTs > nowTs;
+  const canCreate = Boolean(address) && paramsValid;
 
   const tx = useWriteContract();
   const receipt = useWaitForTransactionReceipt({hash: tx.data});
@@ -67,8 +71,8 @@ export function CreateMandate() {
 
   function addDestination() {
     const d = newDest.trim();
-    if (!isAddress(d)) return;
-    if (destinations.includes(d as Address)) return;
+    if (!isNonZeroAddress(d) || destinations.length >= MAX_DESTINATIONS) return;
+    if (destinations.some((destination) => destination.toLowerCase() === d.toLowerCase())) return;
     setDestinations([...destinations, d as Address]);
     setNewDest("");
   }
@@ -78,10 +82,7 @@ export function CreateMandate() {
   }
 
   function submit() {
-    if (!isValid(registryAddr) || !paramsValid) return;
-    // nextId is the ID that this transaction will create. Preserve it before the
-    // registry increments so the post-confirmation route always opens the right mandate.
-    setCreatedId(nextId as bigint | undefined);
+    if (!address || !isValid(registryAddr) || !paramsValid) return;
     tx.writeContract({
       address: registryAddr,
       abi: mandateRegistryAbi,
@@ -90,10 +91,10 @@ export function CreateMandate() {
         {
           agent: agent as Address,
           approvedDestinations: destinations,
-          perTxLimit: parseUnits(perTx, USDC_DECIMALS),
-          dailyLimit: parseUnits(daily, USDC_DECIMALS),
-          approvalThreshold: parseUnits(threshold, USDC_DECIMALS),
-          apyTriggerBps: BigInt(apyBps),
+          perTxLimit: perTxAmount!,
+          dailyLimit: dailyAmount!,
+          approvalThreshold: thresholdAmount!,
+          apyTriggerBps: apyBpsAmount!,
           reserveDestination: reserveDest as Address,
           executionMode: mode === "AutoExecute" ? 0 : 1,
           expiry: BigInt(expiryTs),
@@ -103,10 +104,19 @@ export function CreateMandate() {
   }
 
   useEffect(() => {
-    if (receipt.isSuccess && createdId) {
-      navigate(`/detail?id=${createdId.toString()}`);
+    if (!receipt.isSuccess || !receipt.data) return;
+    for (const log of receipt.data.logs) {
+      try {
+        const event = decodeEventLog({abi: mandateRegistryAbi, data: log.data, topics: log.topics});
+        if (event.eventName === "MandateCreated" && typeof event.args.id === "bigint") {
+          navigate(`/detail?id=${event.args.id.toString()}`);
+          return;
+        }
+      } catch {
+        // A receipt also includes logs from other contracts; only the registry event is relevant.
+      }
     }
-  }, [receipt.isSuccess, navigate, createdId]);
+  }, [receipt.data, receipt.isSuccess, navigate]);
 
   const err = decodeTxError(tx.error);
 
@@ -122,7 +132,7 @@ export function CreateMandate() {
         <div className="page-head-actions">
           <button
             className="btn btn-primary btn-sm"
-            disabled={!paramsValid || tx.isPending || receipt.isLoading}
+            disabled={!canCreate || tx.isPending || receipt.isLoading}
             onClick={submit}
           >
             {tx.isPending || receipt.isLoading ? "Signing…" : "Sign mandate → Sepolia"}
@@ -135,17 +145,14 @@ export function CreateMandate() {
           <div className="form-section">
             <h3>Basics</h3>
             <div className="field">
-              <label>Mandate name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className="field">
               <label>Agent address</label>
               <input
                 value={agent}
                 onChange={(e) => setAgent(e.target.value)}
                 placeholder="0x…"
-                style={!agent || isAddress(agent) ? {} : {borderColor: "var(--color-danger)"}}
+                style={!agent || isNonZeroAddress(agent) ? {} : {borderColor: "var(--color-danger)"}}
               />
+              <div className="hint">The agent can submit proposals, but never withdraw funds directly.</div>
             </div>
           </div>
 
@@ -153,15 +160,15 @@ export function CreateMandate() {
             <h3>Approved destinations</h3>
             <div className="chip-list" style={{marginBottom: 12}}>
               {destinations.map((d, i) => {
-                const def = DEFAULT_DESTINATIONS.find((x) => x.address.toLowerCase() === d.toLowerCase());
                 return (
                   <span className="chip" key={d}>
-                    {def?.label ?? short(d)}
+                    {short(d)}
                     <span className="x" onClick={() => removeDest(i)}>×</span>
                   </span>
                 );
               })}
             </div>
+            <div className="hint" style={{marginTop: 8}}>Add only destination addresses you have verified yourself.</div>
             <div style={{display: "flex", gap: 8}}>
               <input
                 value={newDest}
@@ -171,12 +178,17 @@ export function CreateMandate() {
               />
               <button
                 className="btn btn-ghost btn-sm"
-                disabled={!isAddress(newDest)}
+                disabled={!isNonZeroAddress(newDest) || destinations.length >= MAX_DESTINATIONS}
                 onClick={addDestination}
               >
                 + Add
               </button>
             </div>
+            {destinations.length >= MAX_DESTINATIONS && (
+              <div className="hint" style={{marginTop: 8, color: "var(--color-warning)"}}>
+                Maximum {MAX_DESTINATIONS} destinations per mandate.
+              </div>
+            )}
           </div>
 
           <div className="form-section">
@@ -273,14 +285,14 @@ export function CreateMandate() {
           <button
             className="btn btn-primary btn-wide"
             style={{marginTop: 20}}
-            disabled={!paramsValid || tx.isPending || receipt.isLoading}
+            disabled={!canCreate || tx.isPending || receipt.isLoading}
             onClick={submit}
           >
             {tx.isPending || receipt.isLoading ? "Signing…" : "Sign mandate → Sepolia"}
           </button>
-          {!paramsValid && (
+          {!canCreate && (
             <div className="hint" style={{marginTop: 10, color: "var(--color-warning)"}}>
-              Form has invalid fields. Fix them before signing.
+              {address ? "Form has invalid fields. Fix them before signing." : "Connect the owner wallet before signing."}
             </div>
           )}
           {err && (
@@ -323,4 +335,26 @@ function short(a?: string) {
   if (!a) return "";
   if (!isAddress(a)) return "";
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
+}
+
+function isNonZeroAddress(value: string): value is Address {
+  return isAddress(value) && value.toLowerCase() !== ZERO_ADDRESS;
+}
+
+function parseUsdc(value: string): bigint | undefined {
+  if (!/^\d+(?:\.\d{1,6})?$/.test(value)) return undefined;
+  try {
+    return parseUnits(value, USDC_DECIMALS);
+  } catch {
+    return undefined;
+  }
+}
+
+function parseWholeNumber(value: string): bigint | undefined {
+  if (!/^\d+$/.test(value)) return undefined;
+  try {
+    return BigInt(value);
+  } catch {
+    return undefined;
+  }
 }

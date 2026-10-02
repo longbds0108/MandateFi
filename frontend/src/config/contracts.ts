@@ -11,12 +11,23 @@ const DEPLOYED = {
   executor: "0xA5a656F266c75Cb491e365BcB5F6B5b1409bD1C4",
 } as const;
 
+// PolicyExecutor was deployed in this confirmed Sepolia block. Keep this in
+// source with the deployment addresses so event backfills never query blocks
+// before the contract existed.
+const DEPLOYED_BLOCKS = {
+  executor: 11_826_244n,
+} as const;
+
 export const CONTRACTS = {
   usdc: (env.VITE_USDC_ADDRESS ?? DEPLOYED.usdc) as `0x${string}`,
   vault: (env.VITE_MANDATE_VAULT_ADDRESS ?? DEPLOYED.vault) as `0x${string}`,
   registry: (env.VITE_MANDATE_REGISTRY_ADDRESS ?? DEPLOYED.registry) as `0x${string}`,
   executor: (env.VITE_POLICY_EXECUTOR_ADDRESS ?? DEPLOYED.executor) as `0x${string}`,
 };
+
+export const POLICY_EXECUTOR_DEPLOYMENT_BLOCK = BigInt(
+  env.VITE_POLICY_EXECUTOR_DEPLOYMENT_BLOCK ?? DEPLOYED_BLOCKS.executor,
+);
 
 export function isValid(addr: `0x${string}` | undefined): addr is `0x${string}` {
   if (!addr) return false;

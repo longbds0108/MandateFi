@@ -1,8 +1,8 @@
 import {useEffect, useState, useMemo} from "react";
-import {usePublicClient, useWatchContractEvent} from "wagmi";
+import {usePublicClient} from "wagmi";
 import {formatUnits, type Log} from "viem";
 import {policyExecutorAbi} from "../abi/PolicyExecutor";
-import {CONTRACTS, USDC_DECIMALS, isValid} from "../config/contracts";
+import {CONTRACTS, POLICY_EXECUTOR_DEPLOYMENT_BLOCK, USDC_DECIMALS, isValid} from "../config/contracts";
 
 type Verdict = 0 | 1 | 2;
 type Row = {
@@ -19,43 +19,63 @@ type Row = {
 };
 
 type Filter = "all" | "allowed" | "approval" | "denied";
+type SyncState = "loading" | "ready" | "error";
 
 export function PolicyTrace() {
   const client = usePublicClient();
   const [rows, setRows] = useState<Row[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
+  const [syncState, setSyncState] = useState<SyncState>("loading");
+  const [range, setRange] = useState<{from: bigint; to: bigint}>();
+  const [syncError, setSyncError] = useState("");
   const executorAddr = CONTRACTS.executor;
 
   // Backfill: pull the most recent events on mount (last ~20k blocks ≈ 3 days on Sepolia)
   useEffect(() => {
     if (!client || !isValid(executorAddr)) return;
+    let cancelled = false;
+    let interval: number | undefined;
     (async () => {
       try {
+        setSyncState("loading");
+        setSyncError("");
         const latest = await client.getBlockNumber();
-        const from = latest > 20_000n ? latest - 20_000n : 0n;
-        const logs = await client.getContractEvents({
-          address: executorAddr,
-          abi: policyExecutorAbi,
-          eventName: "PolicyChecked",
-          fromBlock: from,
-          toBlock: "latest",
-        });
-        setRows(logs.slice().reverse().map(logToRow));
+        const from = POLICY_EXECUTOR_DEPLOYMENT_BLOCK > latest ? latest : POLICY_EXECUTOR_DEPLOYMENT_BLOCK;
+        const logs = await getPolicyCheckedEvents(client, executorAddr, from, latest);
+        if (cancelled) return;
+        setRows((previous) => mergeRows(logs.map(logToRow), previous));
+        setRange({from, to: latest});
+        setSyncState("ready");
+        let lastSeenBlock = latest;
+        const poll = async () => {
+          try {
+            const current = await client.getBlockNumber();
+            if (current <= lastSeenBlock) return;
+            const newLogs = await getPolicyCheckedEvents(client, executorAddr, lastSeenBlock + 1n, current);
+            if (cancelled) return;
+            setRows((previous) => mergeRows(newLogs.map(logToRow), previous));
+            setRange((previous) => previous ? {...previous, to: current} : {from: lastSeenBlock + 1n, to: current});
+            lastSeenBlock = current;
+            setSyncState("ready");
+          } catch {
+            if (!cancelled) {
+              setSyncState("error");
+              setSyncError("The RPC did not return new PolicyChecked events. Refresh to retry.");
+            }
+          }
+        };
+        interval = window.setInterval(() => { void poll(); }, 12_000);
       } catch (e) {
-        console.warn("backfill failed:", e);
+        if (cancelled) return;
+        setSyncState("error");
+        setSyncError("The RPC did not return PolicyChecked events. Refresh to retry.");
       }
     })();
+    return () => {
+      cancelled = true;
+      if (interval) window.clearInterval(interval);
+    };
   }, [client, executorAddr]);
-
-  useWatchContractEvent({
-    address: executorAddr,
-    abi: policyExecutorAbi,
-    eventName: "PolicyChecked",
-    onLogs(logs) {
-      setRows((prev) => [...logs.map(logToRow), ...prev].slice(0, 200));
-    },
-    enabled: isValid(executorAddr),
-  });
 
   const filtered = useMemo(() => {
     if (filter === "all") return rows;
@@ -79,12 +99,12 @@ export function PolicyTrace() {
         <div>
           <h1>Policy trace</h1>
           <div className="sub" style={{display: "flex", alignItems: "center", gap: 10}}>
-            <span className="live-dot" aria-hidden="true" />
-            <span style={{color: "var(--color-safe)", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "0.72rem"}}>
-              Live
+            <span className="live-dot" aria-hidden="true" style={{background: syncState === "error" ? "var(--color-danger)" : undefined}} />
+            <span style={{color: syncState === "error" ? "var(--color-danger)" : "var(--color-safe)", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: "0.72rem"}}>
+              {syncState === "loading" ? "Loading" : syncState === "error" ? "Unavailable" : "Confirmed"}
             </span>
             <span style={{color: "var(--color-text-secondary)"}}>
-              · streaming on-chain events from Sepolia
+              {syncState === "error" ? "· Could not read PolicyChecked events from Sepolia" : range ? `· blocks ${range.from.toString()}–${range.to.toString()} on Sepolia` : "· reading Sepolia events"}
             </span>
           </div>
         </div>
@@ -98,6 +118,7 @@ export function PolicyTrace() {
       </div>
 
       <div className="glass">
+        {syncState === "error" && <div style={{padding: "12px 16px", color: "var(--color-danger)", borderBottom: "1px solid rgba(229,72,77,.28)", fontSize: "0.82rem"}}>Unable to load the on-chain trace: {syncError}</div>}
         <table>
           <thead>
             <tr>
@@ -114,7 +135,7 @@ export function PolicyTrace() {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={7} style={{textAlign: "center", color: "var(--color-text-secondary)", padding: 36}}>
-                  {rows.length === 0 ? "No PolicyChecked events in the last ~20k blocks. Submit a proposal on the Agent console." : "No events match this filter."}
+                  {rows.length === 0 ? "No confirmed PolicyChecked events were found in the loaded block range." : "No events match this filter."}
                 </td>
               </tr>
             )}
@@ -149,6 +170,37 @@ export function PolicyTrace() {
       </div>
     </>
   );
+}
+
+function mergeRows(incoming: Row[], existing: Row[]) {
+  const unique = new Map<string, Row>();
+  for (const row of [...incoming, ...existing]) unique.set(`${row.txHash}:${row.proposalId.toString()}`, row);
+  return [...unique.values()].sort((a, b) => (a.blockNumber === b.blockNumber ? Number(b.proposalId - a.proposalId) : a.blockNumber > b.blockNumber ? -1 : 1));
+}
+
+async function getPolicyCheckedEvents(
+  client: NonNullable<ReturnType<typeof usePublicClient>>,
+  executor: `0x${string}`,
+  fromBlock: bigint,
+  toBlock: bigint,
+) {
+  const events = [] as Awaited<ReturnType<typeof client.getContractEvents>>;
+  // The public Sepolia RPC limits eth_getLogs to 1,000 blocks. Querying in
+  // 999-block windows preserves the complete trace without exceeding it.
+  const window = 999n;
+  for (let start = fromBlock; start <= toBlock;) {
+    const end = start + window > toBlock ? toBlock : start + window;
+    const chunk = await client.getContractEvents({
+      address: executor,
+      abi: policyExecutorAbi,
+      eventName: "PolicyChecked",
+      fromBlock: start,
+      toBlock: end,
+    });
+    events.push(...chunk);
+    start = end + 1n;
+  }
+  return events;
 }
 
 function logToRow(log: Log & {args?: any}): Row {

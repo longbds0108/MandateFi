@@ -1,5 +1,6 @@
 import {useState, useEffect, useMemo} from "react";
 import {useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt} from "wagmi";
+import {useSearchParams} from "react-router-dom";
 import {parseUnits, formatUnits, keccak256, toHex, isAddress, type Address} from "viem";
 import {mandateRegistryAbi} from "../abi/MandateRegistry";
 import {policyExecutorAbi} from "../abi/PolicyExecutor";
@@ -10,7 +11,9 @@ type Verdict = 0 | 1 | 2;
 
 export function AgentConsole() {
   const {address} = useAccount();
-  const [mandateId, setMandateId] = useState("1");
+  const [searchParams] = useSearchParams();
+  const requestedMandateId = searchParams.get("mandate") ?? "";
+  const [mandateId, setMandateId] = useState(requestedMandateId);
   const [destination, setDestination] = useState("");
   const [amount, setAmount] = useState("50");
   const [reason, setReason] = useState("");
@@ -26,6 +29,10 @@ export function AgentConsole() {
   });
   const maxId = nextId ? Number(nextId) - 1 : 0;
   const mandateIds = Array.from({length: maxId}, (_, i) => i + 1);
+
+  useEffect(() => {
+    setMandateId(requestedMandateId);
+  }, [requestedMandateId]);
 
   // Load mandate details for the selected id
   const idBig = useMemo(() => {
@@ -48,6 +55,8 @@ export function AgentConsole() {
     query: {enabled: isValid(registryAddr) && idBig > 0n},
   });
   const destinations = (destList as Address[] | undefined) ?? [];
+  const m = mandate as any;
+  const isAgent = Boolean(m && address && m.agent?.toLowerCase?.() === address.toLowerCase());
 
   useEffect(() => {
     const isAllowed = destinations.some((item) => item.toLowerCase() === destination.toLowerCase());
@@ -57,7 +66,8 @@ export function AgentConsole() {
   }, [destinations, destination]);
 
   const parsedAmount = useMemo(() => {
-    try { return amount ? parseUnits(amount, USDC_DECIMALS) : 0n; } catch { return 0n; }
+    if (!/^\d+(?:\.\d{1,6})?$/.test(amount)) return 0n;
+    try { return parseUnits(amount, USDC_DECIMALS); } catch { return 0n; }
   }, [amount]);
 
   // Dry-run via useReadContract (eth_call to evaluate() — read-only, no gas)
@@ -65,6 +75,7 @@ export function AgentConsole() {
     address: executorAddr,
     abi: policyExecutorAbi,
     functionName: "evaluate",
+    account: address,
     args: idBig > 0n && isAddress(destination) && parsedAmount > 0n
       ? [idBig, destination as Address, parsedAmount]
       : undefined,
@@ -75,7 +86,7 @@ export function AgentConsole() {
   const proposeReceipt = useWaitForTransactionReceipt({hash: propose.data});
 
   function submit() {
-    if (!executorAddr || !isAddress(destination) || parsedAmount === 0n) return;
+    if (!isAgent || !isValid(executorAddr) || idBig <= 0n || !isAddress(destination) || parsedAmount === 0n) return;
     const reasonHash = reason ? keccak256(toHex(reason)) : "0x0000000000000000000000000000000000000000000000000000000000000000";
     propose.writeContract({
       address: executorAddr,
@@ -89,9 +100,11 @@ export function AgentConsole() {
   const ruleHit: number | undefined = evalResult ? Number(evalResult[1]) : undefined;
 
   const err = decodeTxError(propose.error) || decodeTxError(evalError);
-  const m = mandate as any;
+  const canPropose = isAgent && idBig > 0n && isAddress(destination) && parsedAmount > 0n && isValid(executorAddr);
 
-  const isAgent = m && address && m.agent?.toLowerCase?.() === address.toLowerCase();
+  useEffect(() => {
+    if (proposeReceipt.isSuccess) evalRefetch();
+  }, [proposeReceipt.isSuccess, evalRefetch]);
 
   return (
     <>
@@ -99,7 +112,7 @@ export function AgentConsole() {
         <div>
           <h1>Agent console</h1>
           <div className="sub">
-            Compose a proposal and run it against the policy. Dry-run is free; Submit broadcasts the proposal.
+            The connected agent wallet can check and submit a proposal against the live policy.
           </div>
         </div>
       </div>
@@ -155,25 +168,30 @@ export function AgentConsole() {
                 rows={2}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="APY delta · Compound 3.95% ↓ vs Aave 4.82% ↑ · move surplus to higher-yield reserve."
+                placeholder="Optional internal reference. Only its hash is stored on-chain."
               />
             </div>
 
             <div style={{display: "flex", gap: 10}}>
-              <button className="btn btn-ghost btn-wide" onClick={() => evalRefetch()} disabled={evalBusy || idBig === 0n}>
+              <button className="btn btn-ghost btn-wide" onClick={() => evalRefetch()} disabled={evalBusy || !canPropose}>
                 {evalBusy ? "Checking…" : "Dry-run against policy"}
               </button>
               <button
                 className="btn btn-primary btn-wide"
                 onClick={submit}
-                disabled={!isAgent || propose.isPending || proposeReceipt.isLoading || !isValid(executorAddr)}
+                disabled={!canPropose || propose.isPending || proposeReceipt.isLoading}
               >
                 {propose.isPending || proposeReceipt.isLoading ? "Submitting…" : "Submit proposal"}
               </button>
             </div>
             {!isAgent && m && (
               <div className="hint" style={{marginTop: 10, color: "var(--color-warning)"}}>
-                You are not the agent for mandate #{mandateId}. Only {short(m.agent)} can submit.
+                Connect the agent wallet ({short(m.agent)}) to dry-run or submit this proposal.
+              </div>
+            )}
+            {isAgent && parsedAmount === 0n && (
+              <div className="hint" style={{marginTop: 10, color: "var(--color-warning)"}}>
+                Enter a valid USDC amount with up to 6 decimal places.
               </div>
             )}
           </div>
@@ -184,12 +202,13 @@ export function AgentConsole() {
               <div style={{flex: 1}}>
                 <h4>{verdictHeadline(verdict)}</h4>
                 <p>{verdictBody(verdict, ruleHit)}</p>
-                {proposeReceipt.isSuccess && (
-                  <div className="chip" style={{marginTop: 10, borderColor: "rgba(79,209,197,0.4)", color: "var(--color-safe)"}}>
-                    ✓ On-chain in block {proposeReceipt.data?.blockNumber?.toString()}
-                  </div>
-                )}
               </div>
+            </div>
+          )}
+
+          {proposeReceipt.isSuccess && (
+            <div className="chip" style={{marginTop: 16, borderColor: "rgba(79,209,197,0.4)", color: "var(--color-safe)"}}>
+              ✓ Proposal confirmed on-chain in block {proposeReceipt.data?.blockNumber?.toString()}. Check Policy trace for its recorded result.
             </div>
           )}
 
