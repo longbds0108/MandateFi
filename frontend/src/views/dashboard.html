@@ -1,0 +1,175 @@
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <div class="sub">Live account overview · Ethereum Sepolia</div>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-ghost btn-sm">Refresh ↻</button>
+          <button class="btn btn-primary btn-sm" data-view="create">+ New mandate</button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="lbl">Vault balance <span class="tip" data-tip="Total USDC held by the MandateVault contract on your behalf. Always withdrawable to your wallet.">?</span></div>
+          <div class="val">12,480<span class="unit">USDC</span></div>
+          <div class="delta up">+320 today</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Wallet balance</div>
+          <div class="val">2,340<span class="unit">USDC</span></div>
+          <div class="delta">Available to deposit</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Active mandates</div>
+          <div class="val">2 <span class="unit">of 4 total</span></div>
+          <div class="delta">1 paused · 1 revoked</div>
+        </div>
+        <div class="stat">
+          <div class="lbl">Daily limit used <span class="tip" data-tip="Combined usage across all active mandates against today's cap. Resets on-chain at midnight UTC.">?</span></div>
+          <div class="val">320<span class="unit">/ 500 USDC</span></div>
+          <div class="progress warn" style="margin-top: 4px;"><div class="fill" style="width: 64%;"></div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="glass" style="margin-bottom: 20px;">
+            <div class="panel-head">
+              <h3>Active mandates</h3>
+              <a class="sub" data-view="detail" style="color: var(--color-accent);">View all →</a>
+            </div>
+            <div class="mrow" data-view="detail">
+              <div>
+                <div class="name">Stable Rebalancer v1</div>
+                <div class="meta">#1 · Agent 0x7b3e…92fa</div>
+              </div>
+              <div class="usage">
+                <div class="usage-top"><span>Daily</span><span>320 / 500</span></div>
+                <div class="progress warn"><div class="fill" style="width: 64%;"></div></div>
+              </div>
+              <span class="badge active">● Active</span>
+              <div class="expiry">Exp. 2026-12-31</div>
+              <span style="color: var(--color-text-secondary);">→</span>
+            </div>
+            <div class="mrow" data-view="detail">
+              <div>
+                <div class="name">Compound-only</div>
+                <div class="meta">#3 · Agent 0x1a2b…cc33</div>
+              </div>
+              <div class="usage">
+                <div class="usage-top"><span>Daily</span><span>0 / 1,000</span></div>
+                <div class="progress"><div class="fill" style="width: 0%;"></div></div>
+              </div>
+              <span class="badge active">● Active</span>
+              <div class="expiry">Exp. 2027-03-14</div>
+              <span style="color: var(--color-text-secondary);">→</span>
+            </div>
+          </div>
+
+          <div class="glass">
+            <div class="panel-head">
+              <h3>APY · 24h</h3>
+              <span class="sub">Mock oracle · updated 14:12 UTC</span>
+            </div>
+            <div class="panel-body" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+              <div class="apy-card">
+                <div class="pool">Aave v3 <span style="color: var(--color-safe); font-size: 0.72rem;">↑</span></div>
+                <div class="rate">4.82<span class="unit">%</span></div>
+                <svg class="sparkline safe" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="area" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3 L120,32 L0,32 Z" />
+                  <path class="line" d="M0,24 L10,22 L20,18 L30,20 L40,15 L50,12 L60,16 L70,10 L80,8 L90,6 L100,4 L110,6 L120,3" />
+                  <circle class="dot" cx="120" cy="3" r="2.5" />
+                </svg>
+                <div class="trend">+0.14</div>
+              </div>
+              <div class="apy-card">
+                <div class="pool">Compound v3 <span style="color: var(--color-danger); font-size: 0.72rem;">↓</span></div>
+                <div class="rate">3.95<span class="unit">%</span></div>
+                <svg class="sparkline warn" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="area" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24 L120,32 L0,32 Z" />
+                  <path class="line" d="M0,6 L10,8 L20,10 L30,9 L40,12 L50,14 L60,13 L70,16 L80,18 L90,17 L100,20 L110,22 L120,24" />
+                  <circle class="dot" cx="120" cy="24" r="2.5" />
+                </svg>
+                <div class="trend">−0.22</div>
+              </div>
+              <div class="apy-card">
+                <div class="pool">Reserve <span style="color: var(--color-text-secondary); font-size: 0.72rem;">—</span></div>
+                <div class="rate">2.10<span class="unit">%</span></div>
+                <svg class="sparkline flat" viewBox="0 0 120 32" preserveAspectRatio="none">
+                  <path class="line" d="M0,16 L120,16" stroke-dasharray="2 3" />
+                </svg>
+                <div class="trend">Floor</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="glass">
+          <div class="panel-head">
+            <h3>Recent policy trace</h3>
+            <a class="sub" data-view="trace" style="color: var(--color-accent);">All →</a>
+          </div>
+          <div style="padding: 20px 20px 10px; display: grid; grid-template-columns: 100px 1fr; gap: 20px; align-items: center;">
+            <svg viewBox="0 0 80 80" class="donut" style="width: 100px; height: 100px;">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-border)" stroke-width="10" />
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-safe)"    stroke-width="10" stroke-dasharray="134 201" stroke-dashoffset="0"   transform="rotate(-90 40 40)" style="filter: drop-shadow(0 0 4px var(--color-safe));" />
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-warning)" stroke-width="10" stroke-dasharray="43 201"  stroke-dashoffset="-134" transform="rotate(-90 40 40)" style="filter: drop-shadow(0 0 4px var(--color-warning));" />
+              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-danger)"  stroke-width="10" stroke-dasharray="24 201"  stroke-dashoffset="-177" transform="rotate(-90 40 40)" style="filter: drop-shadow(0 0 4px var(--color-danger));" />
+              <text x="40" y="38" text-anchor="middle" fill="var(--color-text-primary)" font-size="14" font-weight="600" font-family="var(--font-body)">42</text>
+              <text x="40" y="52" text-anchor="middle" fill="var(--color-text-secondary)" font-size="7" letter-spacing="1" font-family="var(--font-body)">24h</text>
+            </svg>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-safe); box-shadow: 0 0 6px var(--color-safe);"></span>Allowed</span>
+                <span style="font-weight: 600; font-size: 0.86rem;">28</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-warning); box-shadow: 0 0 6px var(--color-warning);"></span>Approval</span>
+                <span style="font-weight: 600; font-size: 0.86rem;">9</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 6px var(--color-danger);"></span>Denied</span>
+                <span style="font-weight: 600; font-size: 0.86rem;">5</span>
+              </div>
+            </div>
+          </div>
+          <div style="height: 1px; background: var(--color-border); margin: 10px 20px;"></div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:07:52 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>500 USDC</strong> → Unknown pool</div>
+            </div>
+            <span class="badge denied">✕ Denied</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:04:38 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>320 USDC</strong> → Compound v3</div>
+            </div>
+            <span class="badge approval">○ Approval</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">14:02:11 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Rebalance <strong>120 USDC</strong> → Aave v3</div>
+            </div>
+            <span class="badge allowed">● Allowed</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">13:48:50 · M#3 · AGENT 0x1a2b…</div>
+              <div class="desc">Rebalance <strong>80 USDC</strong> → Compound v3</div>
+            </div>
+            <span class="badge allowed">● Allowed</span>
+          </div>
+          <div class="trace-item">
+            <div>
+              <div class="meta">13:30:04 · M#1 · AGENT 0x7b3e…</div>
+              <div class="desc">Transfer <strong>200 USDC</strong> → Stable Reserve (APY trigger)</div>
+            </div>
+            <span class="badge allowed">● Allowed</span>
+          </div>
+        </div>
+      </div>

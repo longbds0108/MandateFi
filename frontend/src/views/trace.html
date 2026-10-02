@@ -1,0 +1,141 @@
+      <div class="page-head">
+        <div>
+          <h1>Policy trace</h1>
+          <div class="sub" style="display: flex; align-items: center; gap: 10px;">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span style="color: var(--color-safe); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem;">Live</span>
+            <span style="color: var(--color-text-secondary);">· streaming on-chain events from Sepolia</span>
+          </div>
+        </div>
+        <div class="page-head-actions">
+          <button class="btn btn-ghost btn-sm">Export CSV</button>
+          <button class="btn btn-ghost btn-sm">Refresh ↻</button>
+        </div>
+      </div>
+
+      <!-- 24h verdict timeline -->
+      <div class="glass" style="margin-bottom: 16px;">
+        <div class="panel-head">
+          <h3>Verdict timeline · 24h</h3>
+          <span class="sub">42 events · hover for detail</span>
+        </div>
+        <div style="padding: 20px 20px 14px;">
+          <svg viewBox="0 0 800 60" preserveAspectRatio="none" style="width: 100%; height: 60px; display: block;">
+            <!-- baseline -->
+            <line x1="0" x2="800" y1="30" y2="30" stroke="#2A2438" />
+            <!-- hour ticks -->
+            <g fill="#2A2438">
+              <rect x="0" y="26" width="1" height="8" /><rect x="100" y="26" width="1" height="8" /><rect x="200" y="26" width="1" height="8" />
+              <rect x="300" y="26" width="1" height="8" /><rect x="400" y="26" width="1" height="8" /><rect x="500" y="26" width="1" height="8" />
+              <rect x="600" y="26" width="1" height="8" /><rect x="700" y="26" width="1" height="8" /><rect x="800" y="26" width="1" height="8" />
+            </g>
+            <!-- allowed events (teal above) -->
+            <g fill="#4FD1C5" style="filter: drop-shadow(0 0 3px #4FD1C5);">
+              <circle cx="20"  cy="20" r="4" /><circle cx="55"  cy="22" r="4" /><circle cx="85"  cy="18" r="4" />
+              <circle cx="140" cy="22" r="4" /><circle cx="190" cy="20" r="4" /><circle cx="230" cy="18" r="4" />
+              <circle cx="285" cy="20" r="4" /><circle cx="320" cy="22" r="4" /><circle cx="360" cy="18" r="4" />
+              <circle cx="420" cy="22" r="4" /><circle cx="470" cy="20" r="4" /><circle cx="510" cy="18" r="4" />
+              <circle cx="555" cy="20" r="4" /><circle cx="600" cy="22" r="4" /><circle cx="640" cy="18" r="4" />
+              <circle cx="680" cy="20" r="4" /><circle cx="720" cy="22" r="4" /><circle cx="755" cy="18" r="4" />
+              <circle cx="770" cy="22" r="4" /><circle cx="785" cy="20" r="4" />
+            </g>
+            <!-- approval events (warn below) -->
+            <g fill="#E8B54C" style="filter: drop-shadow(0 0 3px #E8B54C);">
+              <circle cx="75"  cy="42" r="4" /><circle cx="165" cy="42" r="4" /><circle cx="245" cy="42" r="4" />
+              <circle cx="340" cy="42" r="4" /><circle cx="440" cy="42" r="4" /><circle cx="520" cy="42" r="4" />
+              <circle cx="625" cy="42" r="4" /><circle cx="710" cy="42" r="4" /><circle cx="765" cy="42" r="4" />
+            </g>
+            <!-- denied events (danger at edge) -->
+            <g fill="#E5484D" style="filter: drop-shadow(0 0 4px #E5484D);">
+              <circle cx="110" cy="46" r="5" /><circle cx="265" cy="46" r="5" /><circle cx="395" cy="46" r="5" />
+              <circle cx="590" cy="46" r="5" /><circle cx="745" cy="46" r="5" />
+            </g>
+          </svg>
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--color-text-secondary); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px;">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>now</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip on">All <span class="count">42</span></button>
+        <button class="filter-chip">Allowed <span class="count">28</span></button>
+        <button class="filter-chip">Requires approval <span class="count">9</span></button>
+        <button class="filter-chip">Denied <span class="count">5</span></button>
+        <div style="flex: 1;"></div>
+        <select class="filter-chip" style="padding: 7px 12px;">
+          <option>All mandates</option>
+          <option>#1 · Stable Rebalancer v1</option>
+          <option>#3 · Compound-only</option>
+        </select>
+        <select class="filter-chip" style="padding: 7px 12px;">
+          <option>Last 24h</option>
+          <option>Last 7 days</option>
+          <option>All time</option>
+        </select>
+      </div>
+
+      <div class="glass">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Mandate</th>
+              <th class="num-cell">Amount</th>
+              <th>Destination</th>
+              <th>Verdict</th>
+              <th>Tx</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>14:07:52</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>500</strong> USDC</td>
+              <td><code>Unknown pool</code></td>
+              <td><span class="badge denied">✕ Denied</span></td>
+              <td><code>0x8f3a…b721 ↗</code></td>
+            </tr>
+            <tr>
+              <td>14:04:38</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>320</strong> USDC</td>
+              <td>Compound v3</td>
+              <td><span class="badge approval">○ Approval</span></td>
+              <td><code>0x4e1c…ff02 ↗</code></td>
+            </tr>
+            <tr>
+              <td>14:02:11</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>120</strong> USDC</td>
+              <td>Aave v3</td>
+              <td><span class="badge allowed">● Allowed</span></td>
+              <td><code>0xa5c8…11ed ↗</code></td>
+            </tr>
+            <tr>
+              <td>13:48:50</td>
+              <td>M#3 Compound-only</td>
+              <td class="num-cell"><strong>80</strong> USDC</td>
+              <td>Compound v3</td>
+              <td><span class="badge allowed">● Allowed</span></td>
+              <td><code>0x6b4d…5fa9 ↗</code></td>
+            </tr>
+            <tr>
+              <td>13:30:04</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>200</strong> USDC</td>
+              <td>Stable Reserve</td>
+              <td><span class="badge allowed">● Allowed</span></td>
+              <td><code>0x2a92…c8d1 ↗</code></td>
+            </tr>
+            <tr>
+              <td>13:10:40</td>
+              <td>M#1 Stable Rebalancer</td>
+              <td class="num-cell"><strong>1,200</strong> USDC</td>
+              <td>Aave v3</td>
+              <td><span class="badge denied">✕ Denied</span></td>
+              <td><code>0xd1b4…09c2 ↗</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>

@@ -1,0 +1,125 @@
+      <div class="page-head">
+        <div>
+          <h1>Agent console</h1>
+          <div class="sub">Compose a proposal and run it against the active mandate. Nothing moves until the executor returns a verdict.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-section">
+            <h3>New proposal</h3>
+            <p class="section-sub">The agent builds a rebalance proposal. The executor is called read-only until you ship it.</p>
+
+            <div class="field">
+              <label>Mandate</label>
+              <select>
+                <option>#1 · Stable Rebalancer v1 (Active)</option>
+                <option>#3 · Compound-only (Active)</option>
+              </select>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Amount</label>
+                <div class="input-group">
+                  <input type="text" value="320" />
+                  <span class="suffix">USDC</span>
+                </div>
+                <div class="hint">Per-tx limit: 200 USDC</div>
+              </div>
+              <div class="field">
+                <label>Destination</label>
+                <select>
+                  <option>Compound v3 USDC Market</option>
+                  <option>Aave v3 USDC Reserve</option>
+                  <option>Stable Reserve (owner)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Reason (optional)</label>
+              <textarea rows="2" placeholder="APY delta: Compound v3 +0.14% vs Aave v3 since 13:00 UTC">APY delta · Compound v3 3.95% ↓ vs Aave v3 4.82% ↑ · move surplus to higher-yield reserve.</textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-ghost btn-wide">Dry-run against policy</button>
+              <button class="btn btn-primary btn-wide">Submit proposal</button>
+            </div>
+          </div>
+
+          <div class="verdict-panel approval">
+            <div class="big-badge">○</div>
+            <div style="flex: 1;">
+              <h4>REQUIRES_APPROVAL · Owner signature needed</h4>
+              <p>Proposal cleared destination and daily caps but exceeds the approval threshold. Awaiting your signature.</p>
+              <div style="display: flex; gap: 10px; margin-top: 12px;">
+                <button class="btn btn-primary btn-sm">Sign approval → Sepolia</button>
+                <button class="btn btn-ghost btn-sm">Reject</button>
+                <button class="btn btn-ghost btn-sm" style="margin-left: auto;" data-view="trace">View in trace →</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="terminal" style="margin-top: 16px;">
+            <div style="padding-left: 44px; font-size: 0.7rem; color: var(--color-text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;">
+              policy-executor · dry-run
+            </div>
+            <div><span class="ok">✓</span> dest in approvedDestinations <span class="dim">→ Compound v3</span></div>
+            <div><span class="ok">✓</span> amount &lt;= perTxLimit <span class="dim">→ 320 &lt; 500</span></div>
+            <div><span class="warn">!</span> amount &gt; approvalThreshold <span class="warn">→ 320 &gt; 200</span></div>
+            <div class="block" style="border-top: 1px dashed rgba(255,255,255,0.08);">
+              <span class="warn">verdict:</span> <span class="warn">REQUIRES_APPROVAL</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass">
+          <div class="panel-head">
+            <h3>APY · 24h</h3>
+            <span class="sub">3 pools · mock oracle</span>
+          </div>
+          <div style="padding: 14px 18px 0;">
+            <svg viewBox="0 0 400 180" preserveAspectRatio="none" style="width: 100%; height: 180px; display: block;">
+              <!-- gridlines -->
+              <line x1="0" x2="400" y1="30"  y2="30"  stroke="#2A2438" stroke-dasharray="2 4" />
+              <line x1="0" x2="400" y1="80"  y2="80"  stroke="#2A2438" stroke-dasharray="2 4" />
+              <line x1="0" x2="400" y1="130" y2="130" stroke="#2A2438" stroke-dasharray="2 4" />
+              <!-- y labels -->
+              <text x="4" y="26"  fill="#A79DB5" font-size="9" font-family="var(--font-body)">6%</text>
+              <text x="4" y="76"  fill="#A79DB5" font-size="9" font-family="var(--font-body)">4%</text>
+              <text x="4" y="126" fill="#A79DB5" font-size="9" font-family="var(--font-body)">2%</text>
+
+              <!-- Aave uptrend (safe) -->
+              <path d="M0,80 L30,75 L60,78 L90,70 L120,65 L150,60 L180,62 L210,55 L240,48 L270,50 L300,42 L330,38 L360,35 L400,32"
+                    fill="none" stroke="#4FD1C5" stroke-width="1.75" style="filter: drop-shadow(0 0 3px #4FD1C5);" />
+              <circle cx="400" cy="32" r="3" fill="#4FD1C5" />
+
+              <!-- Compound downtrend (warn) -->
+              <path d="M0,65 L30,68 L60,72 L90,70 L120,76 L150,80 L180,85 L210,82 L240,88 L270,92 L300,95 L330,98 L360,100 L400,105"
+                    fill="none" stroke="#E8B54C" stroke-width="1.75" style="filter: drop-shadow(0 0 3px #E8B54C);" />
+              <circle cx="400" cy="105" r="3" fill="#E8B54C" />
+
+              <!-- Stable Reserve flat (dim) -->
+              <path d="M0,145 L400,145"
+                    fill="none" stroke="#A79DB5" stroke-width="1.25" stroke-dasharray="3 4" />
+              <circle cx="400" cy="145" r="3" fill="#A79DB5" />
+            </svg>
+          </div>
+          <div style="padding: 10px 18px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; font-size: 0.76rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); margin-bottom: 2px;"><span style="width: 10px; height: 2px; background: var(--color-safe); display: inline-block;"></span>Aave v3</div>
+              <div style="font-weight: 600; color: var(--color-safe);">4.82%</div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); margin-bottom: 2px;"><span style="width: 10px; height: 2px; background: var(--color-warning); display: inline-block;"></span>Compound v3</div>
+              <div style="font-weight: 600;">3.95%</div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--color-text-secondary); margin-bottom: 2px;"><span style="width: 10px; height: 2px; background: var(--color-text-secondary); display: inline-block;"></span>Reserve</div>
+              <div style="font-weight: 600; color: var(--color-text-secondary);">2.10%</div>
+            </div>
+          </div>
+        </div>
+      </div>
