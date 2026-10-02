@@ -132,7 +132,7 @@
   }
   .crumbs .sep { opacity: 0.4; }
   .crumbs .current { color: var(--color-text-primary); font-weight: 500; }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
   .network-control, .wallet-control {
     appearance: none;
     border: 0;
@@ -141,36 +141,39 @@
     transition: border-color .18s ease, background .18s ease, transform .18s ease;
   }
   .network-control {
-    display: inline-flex; align-items: center; gap: 12px;
-    min-height: 40px; padding: 0 20px;
-    border: 2px solid #4e2a73; border-radius: 999px;
-    background: rgba(54, 29, 77, .17);
-    color: #c3b5d1; font-size: .95rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 9px;
+    min-height: 36px; padding: 0 14px;
+    border: 1px solid rgba(123, 78, 172, .58); border-radius: 10px;
+    background: linear-gradient(135deg, rgba(72, 39, 103, .38), rgba(31, 24, 42, .72));
+    box-shadow: inset 0 1px rgba(255, 255, 255, .04), 0 4px 16px rgba(0, 0, 0, .14);
+    color: #c9bdd9; font-size: .79rem; font-weight: 650;
   }
-  .network-control:hover { border-color: #70419a; background: rgba(79, 43, 111, .27); }
+  .network-control:hover { border-color: rgba(154, 105, 208, .8); background: rgba(66, 42, 88, .7); }
   .network-status {
-    width: 14px; height: 14px; flex: 0 0 auto; border-radius: 50%;
-    background: #50d6d0; box-shadow: 0 0 16px rgba(80, 214, 208, .72);
+    width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%;
+    background: #4fd1c5; box-shadow: 0 0 10px rgba(79, 209, 197, .55);
   }
   .network-unsupported { border-color: rgba(229, 72, 77, .7); color: #ff9ca0; }
   .wallet-control {
-    display: inline-flex; align-items: center; gap: 14px;
-    min-height: 56px; padding: 0 20px;
-    border-radius: 14px; background: #1b1b22;
-    color: #f7f6f8; font-size: 1.12rem; font-weight: 700;
-    letter-spacing: .01em;
+    display: inline-flex; align-items: center; gap: 10px;
+    min-height: 44px; padding: 0 13px 0 8px;
+    border: 1px solid rgba(255, 255, 255, .055); border-radius: 12px;
+    background: linear-gradient(135deg, #202027, #1a1a21);
+    box-shadow: inset 0 1px rgba(255, 255, 255, .035), 0 5px 18px rgba(0, 0, 0, .16);
+    color: #f5f3f7; font-size: .93rem; font-weight: 650;
+    letter-spacing: .005em;
   }
-  .wallet-control:hover { background: #24242d; transform: translateY(-1px); }
-  .wallet-connect { min-height: 44px; font-size: .92rem; border: 1px solid var(--color-border); }
+  .wallet-control:hover { border-color: rgba(255, 255, 255, .12); background: #26262e; transform: translateY(-1px); }
+  .wallet-connect { min-height: 38px; padding: 0 12px; font-size: .8rem; border-color: var(--color-border); }
   .wallet-avatar {
-    width: 40px; height: 40px; flex: 0 0 auto; overflow: hidden;
+    width: 30px; height: 30px; flex: 0 0 auto; overflow: hidden;
     display: grid; place-items: center; border-radius: 50%;
-    background: radial-gradient(circle at 32% 25%, #82e9fa 0 12%, #40bee0 13% 40%, #227ebd 70%);
-    color: #082d46; font-size: .78rem; font-weight: 800;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
+    background: linear-gradient(145deg, #6a5ab6, #30295d);
+    color: #eeeafd; font-size: .68rem; font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), 0 2px 8px rgba(0,0,0,.26);
   }
   .wallet-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .wallet-chevron { width: 14px; height: 9px; flex: 0 0 auto; color: #f7f6f8; }
+  .wallet-chevron { width: 11px; height: 7px; flex: 0 0 auto; color: #aaa4b5; }
   .net-pill {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 6px 12px; border-radius: 999px;
@@ -903,9 +906,9 @@
     .content { padding: 20px 16px; }
     .topbar { padding: 0 16px; }
     .page-head { flex-direction: column; align-items: stretch; }
-    .network-control { padding: 0 12px; gap: 8px; font-size: .82rem; }
-    .wallet-control { min-height: 44px; padding: 0 14px; gap: 9px; font-size: .9rem; }
-    .wallet-avatar { width: 30px; height: 30px; }
+    .network-control { padding: 0 12px; gap: 8px; font-size: .76rem; }
+    .wallet-control { min-height: 40px; padding: 0 12px 0 7px; gap: 8px; font-size: .84rem; }
+    .wallet-avatar { width: 28px; height: 28px; }
   }
   @media (max-width: 540px) {
     .crumbs { display: none; }

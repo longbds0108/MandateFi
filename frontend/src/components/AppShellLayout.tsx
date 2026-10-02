@@ -129,7 +129,7 @@ export function AppShellLayout() {
                     <>
                       <button className="network-control" onClick={openChainModal} title="Select network">
                         <span className="network-status" aria-hidden="true" />
-                        <span>Sepolia Testnet</span>
+                        <span>Sepolia</span>
                       </button>
                       <button className="wallet-control wallet-connect" onClick={openConnectModal}>
                         Connect wallet
@@ -152,7 +152,7 @@ export function AppShellLayout() {
                   <>
                     <button className="network-control" onClick={openChainModal} title="Change network">
                       <span className="network-status" aria-hidden="true" />
-                      <span>{chain?.name ?? "Sepolia Testnet"}</span>
+                      <span>{chain?.name ?? "Sepolia"}</span>
                     </button>
                     <button className="wallet-control" onClick={openAccountModal} title="Open wallet menu">
                       <span className="wallet-avatar" aria-hidden="true">
